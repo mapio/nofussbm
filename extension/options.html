@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>nofussbm options</title>
+	<script type="text/javascript">
+		var form;
+		function onload() {
+			form = document.forms.options;
+			form.key.value = localStorage.getItem( "key" );
+		}
+		function set() {
+			localStorage.setItem( "key", form.key.value );
+		}
+	</script>
+</head>
+<body onload="onload()">
+	<form action="#" method="post" name="options">
+		Enter API Key: <input type="text" name="key" id="key" size="32" onchange="set()"><br />
+	</form>
+</body>
+</html>

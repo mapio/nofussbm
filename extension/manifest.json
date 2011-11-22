@@ -1,0 +1,25 @@
+{
+  "name": "No fuss bookmarks",
+  "version": "1.0",
+  "description": "An extension to post bookmarks on nofussbm.",
+  "browser_action": {
+    "default_icon": "icon24.png",
+    "popup": "popup.html"
+  },
+  "icons": {
+    "16": "icon24.png",
+    "48": "icon64.png",
+    "128": "icon64.png"
+ },
+ "content_scripts": [
+    {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "js": [ "getinfo.js" ]
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "http://localhost/"
+  ],
+  "options_page": "options.html"
+}
