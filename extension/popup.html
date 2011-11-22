@@ -8,7 +8,7 @@
 		function onload() {
 			form = document.forms.bookmarks;
 			key = localStorage.getItem( "key" );
-			if ( key == '' ) {
+			if ( ! key ) {
 				alert( "Please set your API key in nofussbm options" );
 			} 
 			chrome.tabs.getSelected( null, function( tab ) {

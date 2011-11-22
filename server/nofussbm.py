@@ -2,8 +2,9 @@ import hmac
 from hashlib import sha1
 from base64 import b64encode, b64decode
 from functools import wraps
+from json import dumps
 
-from flask import Flask, make_response, request, g
+from flask import Flask, make_response, request, g, jsonify
 
 from pymongo import Connection
 
@@ -30,40 +31,37 @@ def before_request():
 def key_required( f ):
 	@wraps( f )
 	def _f( *args, **kwargs ):
- 		email = check_key( request.headers[ 'X-Nofussbm' ] )
-		g.email = email
+ 		g.email  = check_key( request.headers[ 'X-Nofussbm' ] )
 		return f( *args, **kwargs )
 	return _f
 
-# curl -d ''  http://localhost:5000/pippo
-@app.route('/', methods=['POST'])
+@app.route('/', methods = [ 'POST' ] )
 @key_required
 def post():
 	if g.email:
 		data = request.json
 		data[ 'email' ] = g.email
-		result = g.db.insert( data )
+		result = 'Bookmark id: {0}'.format( g.db.insert( data ) )
 	else:
 		result = 'Invalid API key'
-	response = make_response( 'Bookmark id: {0}'.format( result ) )
+	response = make_response( result )
 	response.headers[ 'Content.type' ] = 'text/plain'
 	return response
 
-# curl http://localhost:5000/pippo
-@app.route('/<user>', methods=['GET'])
-def get( user ):
-    return "get " + user
+@app.route('/', methods = [ 'GET' ] )
+@key_required
+def get():
+	result = [ { 'id': str( bm[ '_id' ] ), 'url': bm[ 'url'], 'title': bm[ 'title' ], 'tags': bm[ 'tags' ] } for bm in g.db.find( { 'email': g.email } ) ]
+	response = make_response( dumps( result ) )
+	response.headers[ 'Content.type' ] = 'application/json'
+	return response
 
-# curl -X DELETE  http://localhost:5000/pippo
-@app.route('/<user>', methods=['DELETE'])
-def get( user ):
-    return "delete " + user
-
-# curl -T /dev/null http://localhost:5000/pippo
-@app.route('/<user>', methods=['PUT'])
-def get( user ):
-    return "put " + user
+@app.route('/key/<email>')
+def key( email ):
+	response = make_response( new_key( email ) + '\n' )
+	response.headers[ 'Content.type' ] = 'text/plain'
+	return response
 
 if __name__ == "__main__":
-    app.run( debug = True )
+	app.run( debug = True )
 
