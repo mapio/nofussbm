@@ -19,7 +19,7 @@
   ],
   "permissions": [
     "tabs",
-    "http://localhost/"
+    "http://*/"
   ],
   "options_page": "options.html"
 }

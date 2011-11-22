@@ -26,7 +26,12 @@ def check_key( key ):
 
 @app.before_request
 def before_request():
-    g.db = Connection( 'mongodb://test:pippo@dbh45.mongolab.com:27457/test' )[ 'test' ][ 'urls' ]
+	g.conn = Connection( 'mongodb://test:pippo@dbh45.mongolab.com:27457/test' )
+	g.db = g.conn[ 'test' ][ 'urls' ]
+	
+@app.teardown_request
+def teardown_request( exception ):
+	g.conn.disconnect()
 
 def key_required( f ):
 	@wraps( f )
