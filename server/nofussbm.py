@@ -73,8 +73,23 @@ def key( email ):
 @app.route('/list/<email>')
 def list( email ):
 	result = []
-	for bm in g.db.find( { 'email': email } ):
-		result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+	try:
+		for bm in g.db.find( { 'email': email } ):
+			result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+	except:
+		result = []
+	return textify( u'\n'.join( result ) )
+
+@app.route('/list/<email>/tag/<tags>')
+def list_tags( email, tags ):
+	tags = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
+	print tags
+	result = []
+	try:
+		for bm in g.db.find( { 'email': email } ):
+			result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+	except:
+		result = []
 	return textify( u'\n'.join( result ) )
 
 
@@ -100,12 +115,12 @@ def get():
 @key_required
 def delete():
 	result = { 'error': [], 'deleted': [], 'ignored': [] }
-	for bm in request.json:
+	for pos, bm in enumerate( request.json ):
 		try:
-			_id = ObjectId( bm[ 'id' ] +'z' )
+			_id = ObjectId( bm[ 'id' ] )
 			ret = g.db.remove(  _id, safe = True )
-		except ( InvalidId, OperationFailure ):
-			result[ 'error' ].append( bm[ 'id' ] )
+		except ( KeyError, InvalidId, OperationFailure ):
+			result[ 'error' ].append( '#{0}'.format( pos ) )
 		else:	
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
@@ -117,8 +132,14 @@ def post():
 	for pos, bm in enumerate( request.json ):
 		bm[ 'email' ] = g.email
 		bm[ 'date-added' ] = datetime.utcnow().isoformat()
-		bm[ 'tags' ] = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
-		del bm[ 'id' ]
+		try:
+			bm[ 'tags' ] = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
+		except KeyError:
+			bm[ 'tags' ] = []
+		try:
+			del bm[ 'id' ]
+		except KeyError:
+			pass
 		try:
 			_id = g.db.insert( bm, safe = True )
 		except OperationFailure:
@@ -131,15 +152,15 @@ def post():
 @key_required
 def put():
 	result = { 'error': [], 'updated': [], 'ignored': [] }
-	for bm in request.json:
+	for pos, bm in enumerate( request.json ):
 		_id = ObjectId( bm[ 'id' ] )
 		del bm[ 'id' ]
 		bm[ 'email' ] = g.email
 		bm[ 'date-modified' ] = datetime.utcnow().isoformat()
 		try:
 			ret = g.db.update( { '_id': _id  }, { '$set': bm }, safe = True )
-		except 	( InvalidId, OperationFailure ):
-			result[ 'error' ].append( bm[ 'id' ] )
+		except 	( KeyError, InvalidId, OperationFailure ):
+			result[ 'error' ].append( '#{0}'.format( pos ) )
 		else:
 			result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
