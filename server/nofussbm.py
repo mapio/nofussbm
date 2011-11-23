@@ -73,16 +73,25 @@ def key( email ):
 
 API_PREFIX = '/api/v1'
 
-@app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
+@app.route( API_PREFIX + '/', methods = [ 'GET' ] )
 @key_required
-def put():
-	result = { 'error': [], 'updated': [], 'ignored': [] }
+def get():
+	result = []
+	for bm in g.db.find( { 'email': g.email } ):
+		bm[ 'id' ] = str( bm[ '_id' ] )
+		del bm[ '_id' ]
+		del bm[ 'email' ]
+		result.append( bm )
+	return myjsonify( result )
+
+@app.route( API_PREFIX + '/', methods = [ 'DELETE' ] )
+@key_required
+def delete():
+	result = { 'error': [], 'deleted': [], 'ignored': [] }
 	for bm in request.json:
 		_id = ObjectId( bm[ 'id' ] )
-		del bm[ 'id' ]
-		bm[ 'email' ] = g.email
-		ret = g.db.update( { '_id': _id  }, { '$set': bm }, safe = True )
-		result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
+		ret = g.db.remove( _id, safe = True )
+		result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
 
 @app.route( API_PREFIX + '/', methods = [ 'POST' ] )
@@ -93,15 +102,16 @@ def post():
 	result = 'Bookmark id: {0}'.format( g.db.insert( data ) )
 	return textify( result )
 
-@app.route( API_PREFIX + '/', methods = [ 'GET' ] )
+@app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
 @key_required
-def get():
-	result = []
-	for bm in g.db.find( { 'email': g.email } ):
-		bm[ 'id' ] = str( bm[ '_id' ] )
-		del bm[ '_id' ]
-		del bm[ 'email' ]
-		result.append( bm )
+def put():
+	result = { 'error': [], 'updated': [], 'ignored': [] }
+	for bm in request.json:
+		_id = ObjectId( bm[ 'id' ] )
+		del bm[ 'id' ]
+		bm[ 'email' ] = g.email
+		ret = g.db.update( { '_id': _id  }, { '$set': bm }, safe = True )
+		result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
 
 if __name__ == "__main__":
