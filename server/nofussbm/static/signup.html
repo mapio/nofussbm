@@ -1,50 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>No Fuss Bookmarks</title>
-		<meta name="description" content="No Fuss Bookmarks, bookmarks in the cloud for hackers">
-		<meta name="author" content="Massimo Santini <santini@dsi.unimi.it">
-		<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
-		<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
-		<style type="text/css">
-		body {
-			padding-top: 60px;
-		}
-		</style>
-	</head>
-	<body><div class="container">
-		<a href="https://github.com/mapio/nofussbm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-		<div class="hero-unit">
+<head>
+	<meta charset="utf-8">
+	<title>No Fuss Bookmarks</title>
+	<meta name="description" content="No Fuss Bookmarks, bookmarks in the cloud for hackers">
+	<meta name="author" content="Massimo Santini <santini@dsi.unimi.it">
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link rel="stylesheet" href="_/bootstrap.min.css">
+	<!--
+	><link href="_/prettify.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="_/prettify.js"></script>
+	-->
+	<style type="text/css">
+	body {	padding-top: 60px; }
+	section { padding-top: 60px; }
+	section > .row { margin-bottom: 10px;}
+	</style>
+</head>
+<body><div class="container">
+	<a href="https://github.com/mapio/nofussbm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="_/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
-			<h1>No Fuss Bookmarks</h1>
-
-			<div style="margin-top: 2em">
-
-				<p> No Fuss Bookmarks is a very simple bookmarks store designed for hackers (that don't need fancy interfaces, but nice APIs).</p>
-
-				<p>	The data is stored at <a href="https://mongolab.com/">mongolab</a>, served by a HTTP/REST application hosted on
-					<a href="http://www.heroku.com/">heroku</a>; a minimalistic <a href="http://www.google.com/chrome">Google Chrome</a> extension
-					is provided to facilitate bookmarks collection while browsing. </p>
-
-				<p> You can use the public (and free) store by submitting your email in the following form, or grab a copy of the source code 
-					(of both the server application and Chrome extension) from <a href="https://github.com/mapio/nofussbm">GitHub</a>, possibly
-					subscribe (for free) with mongolab and heroku and roll-out your own (private) store. </p>
-
-			</div>
-
-
-			<div class='row'><div class='offset2 span12'><form>
-				<fieldset>
-					<input type="email" class="span8 xlarge" name="email" id="email" placeholder='Enter your email here'>
-					<button class="btn large primary" type="submit">Get the API key!</button>
-				</fieldset>
-			</form></div></div>
-
+	<div class="hero-unit">
+		<h1>No Fuss Bookmarks</h1>
+		<div style="margin-top: 2em">
+			<p> <em>No Fuss Bookmarks</em> is a very simple <strong>software</strong> and <strong>service</strong> to store
+            bookmarks especially designed for <strong>hackers</strong> (that don't need fancy interfaces, but <strong>nice
+            APIs</strong>). </p> 
+			<p> The <em>software</em> is a simple <a href="http://en.wikipedia.org/wiki/Representational_state_transfer">REST</a>ful
+            server, written using <a href="http://flask.pocoo.org/">Flask</a>, providing a <a
+            href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a> interface to a <a
+            href="http://www.mongodb.org/">mongoDB</a> store, plus a very basic <a href="http://www.google.com/chrome">Google Chrome</a>
+            extension to submit bookmarks. The code is open source and available from <a
+            href="https://github.com/mapio/nofussbm">GitHub</a>. </p>
+			<p> The <em>service</em> is just an incarnation of such software hosted by <a href="http://www.heroku.com/">heroku</a>
+            and <a href="https://mongolab.com/">mongolab</a> that you can freely use just submitting your email below to obtain your
+            API key. </p>
 		</div>
-		<footer><p>&copy; <a href="http://santini.dsi.unimi.it">Massimo Santini</a> 2011</p></footer>
-	</div></body>
+		<div class='row'><div class='offset2 span12'><form>
+			<fieldset>
+				<input type="email" class="span8 xlarge" name="email" id="email" placeholder='Enter your email here'>
+				<button class="btn large primary" type="submit">Get the API key!</button>
+			</fieldset>
+		</form></div></div>
+	</div>
+
+	<section>
+	<div class="page-header"><h1>Basic usage <small>the browser is your friend</small></h1></div>	
+	<div class="row">
+		<div class="span4">
+			<h2>Submit bookmarks</h2>
+		</div>
+		<div class="span12">
+			<p> Install the <a href="nofussbm.crx">No Fuss Bookmark</a> Chrome extension that will, by default, use this server as a backend.</p>
+			<p> <span class="label warning">Attention</span> After installing it, point your Chrome browser at
+            <code>chrome://settings/extensionSettings</code> and, follow the "Option" link of the extension, enter the API key you
+            got submitting your email in the above form. </p>
+			<p> If you want to use an alternate server (and API key), you must download the extension source code and edit it
+            accordingly, than you can install it following for instance this <a
+            href="http://code.google.com/chrome/extensions/getstarted.html#load">instructions</a>. </p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span4">
+			<h2>Get bookmarks</h2>
+		</div>
+		<div class="span12">
+			<p> Point your browser at <code>http://nofussbm.herokuapp.com/list/&lt;EMAIL&gt;</code>, where
+            <code>&lt;EMAIL&gt;</code> is your email, to get a list of all your bookmarks as a (tab separated) text file (that you
+            can, for instance, conveniently <kbd>grep</kbd>, or <kbd>sort</kbd>). </p>
+			<p> You can optionally filter such list by <em>tag</em> adding to the above URL <code>/tag/</code> followed by a (comma
+            separated list) of tags (suitably <a href="http://en.wikipedia.org/wiki/Percent-encoding">encoded</a>). </p>
+			<p> <span class="label warning">Attention</span> All bookmarks are <strong>public</strong>, anyone with your email can
+            get your bookmarks. For instance, you can see a list of <a href="/list/massimo.santini@gmail.com">all</a> my bookmarks,
+            or just the one <a href="/list/massimo.santini@gmail.com/tag/python">tagged with Python</a>. </p>
+		</div> 
+	</div> 
+	</section>
+
+	<section>
+	<div class="page-header"><h1>The APIs <small>command line gives you the power</small></h1></div>	
+	<div class="row">
+		<div class="span16">
+			<p> The APIs are so simple that you can perform all the CRUD operations from the command line, using simple tools such
+            as, for instance, <a href="http://curl.haxx.se/">cURL</a>. </p>
+			<p> Assume that <code>KEY</code> contains your API key (for instance, the one you got submitting your email in the above
+            form), <code>URL</code> contains the APIs endpoint (that is <code>http://nofussbm.herokuapp.com/api/v1/</code> if you
+            use this server as a backend), and the <code>bm.json</code> file contains the following <a
+            href="http://www.json.org/">JSON</a> representation of a bookmark</p>
+			<pre>[{
+  "title": "mapio/nofussbm - GitHub", 
+  "url": "https://github.com/mapio/nofussbm",
+  "tags": "flask,mongodb,python,bookmarks"
+}]</pre>
+			<p> Them, you can <strong>create</strong> such a bookmark by the following command </p>
+			<pre class="prettyprint lang-sh">curl -X POST -d @bm.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+			<p> Hence, you can <strong>read</strong> your bookmarks (and record them in the <code>bms.json</code> file) using </p>
+			<pre class="prettyprint lang-sh">curl -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL > bms.json</pre>
+			<p> If the store was initially empty and you added just <code>bm.json</code>, then <code>bms.json</code> will contain
+			<pre>[{
+  "date-added": "2011-11-23T20:39:43.079860", 
+  "id": "4ecd5a0f57ae477c7a000002", 
+  "tags": [
+      "flask", 
+      "mongodb", 
+      "python", 
+      "bookmarks"
+  ], 
+  "title": "mapio/nofussbm - GitHub", 
+  "url": "https://github.com/mapio/nofussbm"
+}]</pre>
+			<p> If you want, you can edit <code>bms.json</code> and then <strong>update</strong> (matching bookmarks by <code>id</code>) the store with </p>
+			<pre class="prettyprint lang-sh">curl -X PUT -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+			<p> Finally, you can <strong>delete</strong> bookmarks (matching the <code>id</code>) in <code>bms.json</code> with</p>
+			<pre class="prettyprint lang-sh">curl -X DELETE -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+		
+		</div>
+	</div>
+	</section>
+
+	
+	<footer class="footer">
+		<div style='font-size: xx-small;'>
+		<p> <strong>Disclaimer of Warranty</strong> THERE IS NO WARRANTY FOR THE SOFTWARE AND SERVICE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE SOFTWARE AND SERVICE “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE AND SERVICE IS WITH YOU. SHOULD THE SOFTWARE AND SERVICE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </p>
+		<p> <strong>Limitation of Liability</strong> IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE SOFTWARE AND SERVICE AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE SOFTWARE AND SERVICE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE SOFTWARE AND SERVICE TO OPERATE WITH ANY OTHER SOFTWARE AND SERVICES), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </p>
+		<p> <strong>Interpretation of Disclaimer of Warranty and Limitation of Liability</strong> If the disclaimer of warranty and limitation of liability provided above cannot be given local legal effect according to their terms, reviewing courts shall apply local law that most closely approximates an absolute waiver of all civil liability in connection with the Software and Service. </p>
+		</div>
+		<p>&copy; <a href="http://santini.dsi.unimi.it">Massimo Santini</a> 2011</p>
+	</footer> 
+
+</div></body> 
 </html>
 
