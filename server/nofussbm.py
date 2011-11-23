@@ -1,13 +1,15 @@
-import hmac
-from hashlib import sha1
 from base64 import b64encode, b64decode
+from datetime import datetime
 from functools import wraps
+from hashlib import sha1
+import hmac
 from json import dumps
 
 from flask import Flask, make_response, request, g
 
 from pymongo import Connection
-from bson.objectid import ObjectId
+from pymongo.errors import OperationFailure
+from bson.objectid import ObjectId, InvalidId
 
 app = Flask(__name__)
 app.secret_key = 'a well kept secret'
@@ -32,7 +34,7 @@ def textify( text ):
 	return response
 
 def myjsonify( data ):
-	response = make_response( dumps( data, indent = 4, ensure_ascii = False ) + '\n' )
+	response = make_response( dumps( data, indent = 4, sort_keys = True, ensure_ascii = False ) + '\n' )
 	response.headers[ 'Content-Type' ] = 'application/json; charset=UTF-8'
 	return response
 	
@@ -68,6 +70,13 @@ def key_required( f ):
 def key( email ):
 	return textify( new_key( email ) )
 
+@app.route('/list/<email>')
+def list( email ):
+	result = []
+	for bm in g.db.find( { 'email': email } ):
+		result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+	return textify( u'\n'.join( result ) )
+
 
 # API "views"
 
@@ -77,11 +86,14 @@ API_PREFIX = '/api/v1'
 @key_required
 def get():
 	result = []
-	for bm in g.db.find( { 'email': g.email } ):
-		bm[ 'id' ] = str( bm[ '_id' ] )
-		del bm[ '_id' ]
-		del bm[ 'email' ]
-		result.append( bm )
+	try:
+		for bm in g.db.find( { 'email': g.email } ):
+			bm[ 'id' ] = str( bm[ '_id' ] )
+			del bm[ '_id' ]
+			del bm[ 'email' ]
+			result.append( bm )
+	except:
+		result = []
 	return myjsonify( result )
 
 @app.route( API_PREFIX + '/', methods = [ 'DELETE' ] )
@@ -89,18 +101,31 @@ def get():
 def delete():
 	result = { 'error': [], 'deleted': [], 'ignored': [] }
 	for bm in request.json:
-		_id = ObjectId( bm[ 'id' ] )
-		ret = g.db.remove( _id, safe = True )
-		result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( str( _id ) )
+		try:
+			_id = ObjectId( bm[ 'id' ] +'z' )
+			ret = g.db.remove(  _id, safe = True )
+		except ( InvalidId, OperationFailure ):
+			result[ 'error' ].append( bm[ 'id' ] )
+		else:	
+			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
 
 @app.route( API_PREFIX + '/', methods = [ 'POST' ] )
 @key_required
 def post():
-	data = request.json
-	data[ 'email' ] = g.email
-	result = 'Bookmark id: {0}'.format( g.db.insert( data ) )
-	return textify( result )
+	result = { 'error': [], 'added': [] }
+	for pos, bm in enumerate( request.json ):
+		bm[ 'email' ] = g.email
+		bm[ 'date-added' ] = datetime.utcnow().isoformat()
+		bm[ 'tags' ] = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
+		del bm[ 'id' ]
+		try:
+			_id = g.db.insert( bm, safe = True )
+		except OperationFailure:
+			result[ 'error' ].append( '#{0}'.format( pos ) )
+		else:
+			result[ 'added' ].append( str( _id ) )
+	return myjsonify( result )
 
 @app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
 @key_required
@@ -110,8 +135,13 @@ def put():
 		_id = ObjectId( bm[ 'id' ] )
 		del bm[ 'id' ]
 		bm[ 'email' ] = g.email
-		ret = g.db.update( { '_id': _id  }, { '$set': bm }, safe = True )
-		result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
+		bm[ 'date-modified' ] = datetime.utcnow().isoformat()
+		try:
+			ret = g.db.update( { '_id': _id  }, { '$set': bm }, safe = True )
+		except 	( InvalidId, OperationFailure ):
+			result[ 'error' ].append( bm[ 'id' ] )
+		else:
+			result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
 
 if __name__ == "__main__":
