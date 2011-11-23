@@ -4,6 +4,7 @@ from functools import wraps
 from hashlib import sha1
 import hmac
 from json import dumps
+from urllib2 import unquote
 
 from flask import Flask, make_response, request, g
 
@@ -70,23 +71,17 @@ def key_required( f ):
 def key( email ):
 	return textify( new_key( email ) )
 
-@app.route('/list/<email>')
-def list( email ):
+@app.route( '/list/<email>' )
+@app.route( '/list/<email>/tag/<tags>' )
+def list( email, tags = None ):
+	if tags: 
+		tags = map( lambda _: _.strip(), unquote( tags ).split( ',' ) )
+		query = { 'email': email, 'tags' : { '$all' : tags } }
+	else:
+		query = { 'email': email }
 	result = []
 	try:
-		for bm in g.db.find( { 'email': email } ):
-			result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
-	except:
-		result = []
-	return textify( u'\n'.join( result ) )
-
-@app.route('/list/<email>/tag/<tags>')
-def list_tags( email, tags ):
-	tags = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
-	print tags
-	result = []
-	try:
-		for bm in g.db.find( { 'email': email } ):
+		for bm in g.db.find( query ):
 			result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
 	except:
 		result = []
@@ -133,7 +128,7 @@ def post():
 		bm[ 'email' ] = g.email
 		bm[ 'date-added' ] = datetime.utcnow().isoformat()
 		try:
-			bm[ 'tags' ] = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) )
+			bm[ 'tags' ] = map( lambda _: _.strip(), bm[ 'tags' ].split( ',' ) ) # don't if it's already a list
 		except KeyError:
 			bm[ 'tags' ] = []
 		try:
