@@ -6,7 +6,7 @@ import hmac
 from json import dumps
 from urllib2 import unquote
 
-from flask import Flask, make_response, request, g
+from flask import Flask, make_response, request, g, redirect, url_for
 
 from pymongo import Connection
 from pymongo.errors import OperationFailure
@@ -14,7 +14,6 @@ from bson.objectid import ObjectId, InvalidId
 
 app = Flask(__name__)
 app.secret_key = 'a well kept secret'
-
 
 def new_key( email ):
 	return b64encode( '{0}:{1}'.format( email, hmac.new( app.secret_key, email, sha1 ).hexdigest() ) )
@@ -66,6 +65,10 @@ def key_required( f ):
 
 
 # Public "views"
+
+@app.route( '/' )
+def index():
+	return redirect( url_for( 'static', filename = 'signup.html' ) )
 
 @app.route('/key/<email>')
 def key( email ):
@@ -159,7 +162,4 @@ def put():
 		else:
 			result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( str( _id ) )
 	return myjsonify( result )
-
-if __name__ == "__main__":
-	app.run( debug = True )
-
+	
