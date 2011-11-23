@@ -70,7 +70,7 @@ def key_required( f ):
 def index():
 	return redirect( url_for( 'static', filename = 'signup.html' ) )
 
-@app.route('/key/<email>')
+@app.route( '/getkey/<email>' )
 def key( email ):
 	return textify( new_key( email ) )
 

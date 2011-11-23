@@ -13,6 +13,19 @@
 	><link href="_/prettify.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="_/prettify.js"></script>
 	-->
+	<script type="text/javascript" src="_/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="_/bootstrap-modal.js"></script>
+	<script type="text/javascript">$(document).ready(function() {
+		$( '#feedback' ).modal( {
+			keyboard: true,
+			backdrop: true
+		} );
+		$( '#getkey' ).click( function () {
+			$.get( '/getkey/' + $( '#email' ).val(), function() {
+				$( '#feedback' ).modal( 'show' );
+			} );
+		} );
+	});</script>
 	<style type="text/css">
 	body {	padding-top: 60px; }
 	section { padding-top: 60px; }
@@ -39,12 +52,22 @@
             and <a href="https://mongolab.com/">mongolab</a> that you can freely use just submitting your email below to obtain your
             API key. </p>
 		</div>
-		<div class='row'><div class='offset2 span12'><form>
+		<div class='row'><div class='offset2 span12'><form action="#" method="POST">
 			<fieldset>
-				<input type="email" class="span8 xlarge" name="email" id="email" placeholder='Enter your email here'>
-				<button class="btn large primary" type="submit">Get the API key!</button>
+				<input type="email" class="span8 xlarge" id="email" placeholder='Enter your email here'>
+				<button class="btn large primary" id="getkey" type="button">Get the API key!</button>
 			</fieldset>
 		</form></div></div>
+	</div>
+
+	<div id="feedback" class="modal hide fade">
+		<div class="modal-header">
+			<a href="#" class="close">&times;</a>
+			<h3>API key sent!</h3>
+		</div>
+		<div class="modal-body">
+			<p>Please check your email (and possibly spam folder) to grab your key.</p>
+		</div>
 	</div>
 
 	<section>
