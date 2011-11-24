@@ -130,13 +130,13 @@ def key( email ):
 	return ''
 
 @app.route( '/list/<email>' )
-def list( email, tags = None ):
+def list( email ):
 	query = { 'email': email }
 	if 'tags' in request.args: 
 		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
 		query[ 'tags' ] = { '$all': tags }
 	if 'title' in request.args: 
-		query[ 'title' ] = { '$regex': request.args[ 'title' ] }
+		query[ 'title' ] = { '$regex': '/{0}/i'.format( request.args[ 'title' ] ) }
 	result = []
 	try:
 		for bm in g.db.bookmarks.find( query ):

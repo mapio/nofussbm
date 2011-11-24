@@ -94,13 +94,26 @@
 			<p> Point your browser at <code>http://nofussbm.herokuapp.com/list/&lt;EMAIL&gt;</code>, where
             <code>&lt;EMAIL&gt;</code> is your email, to get a list of all your bookmarks as a (tab separated) text file (that you
             can, for instance, conveniently <kbd>grep</kbd>, or <kbd>sort</kbd>). </p>
-			<p> You can optionally filter such list by <em>tag</em> adding to the above URL <code>/tag/</code> followed by a (comma
-            separated list) of tags (suitably <a href="http://en.wikipedia.org/wiki/Percent-encoding">encoded</a>). </p>
+			<p> You can optionally filter such list by <em>tag</em> and/or <em>title</em> adding to the above URL a (suitably <a
+            href="http://en.wikipedia.org/wiki/Percent-encoding">encoded</a>) <a
+            href="http://en.wikipedia.org/wiki/Query_string">query string</a> with the field <code>tag</code> having as value a
+            (comma separated list) of tags that will all match, and/or the field <code>title</code> having as value a string that
+            will match as a (case insensitive) substring. </p>
 			<p> <span class="label warning">Attention</span> All bookmarks are <strong>public</strong>, anyone with your email can
             get your bookmarks. For instance, you can see a list of <a href="/list/massimo.santini@gmail.com">all</a> my bookmarks,
             or just the one <a href="/list/massimo.santini@gmail.com/tag/python">tagged with Python</a>. </p>
 		</div> 
 	</div> 
+	<div class="row">
+		<div class="span4">
+			<h2>Abandon Delicious</h2>
+		</div>
+		<div class="span12">
+			<p> <span class="label important">Important</span> You can easily export your bookmarks from the <em>now fussy</em> <a
+            href="http://delicious.com/">Delicious</a> and import them here! Read the last paragraph of the next section for
+            instructions. </p>
+		</div>
+	</div>
 	</section>
 
 	<section>
@@ -124,14 +137,9 @@
 			<pre class="prettyprint lang-sh">curl -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL > bms.json</pre>
 			<p> If the store was initially empty and you added just <code>bm.json</code>, then <code>bms.json</code> will contain
 			<pre>[{
-  "date-added": "2011-11-23T20:39:43.079860", 
-  "id": "4ecd5a0f57ae477c7a000002", 
-  "tags": [
-      "flask", 
-      "mongodb", 
-      "python", 
-      "bookmarks"
-  ], 
+  "date-added": "2011-11-24 21:33:50.290000", 
+  "id": "4eceb83e57ae478fc5000000", 
+  "tags": "flask,mongodb,python,bookmarks", 
   "title": "mapio/nofussbm - GitHub", 
   "url": "https://github.com/mapio/nofussbm"
 }]</pre>
@@ -139,7 +147,13 @@
 			<pre class="prettyprint lang-sh">curl -X PUT -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
 			<p> Finally, you can <strong>delete</strong> bookmarks (matching the <code>id</code>) in <code>bms.json</code> with</p>
 			<pre class="prettyprint lang-sh">curl -X DELETE -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
-		
+			<p style="padding-top: 20px;"> <span class="label important">Important</span> You can <strong>import</strong> your <a
+            href="http://delicious.com/">Delicious</a> bookmarks as follows: first, export them from their site and you should get
+            an HTML file (usually named <code>delicious.html</code>) containing a sequence of lines of the form </p>
+			<pre>&lt;DT&gt;&lt;A HREF="[url]" ADD_DATE="[timestamp]" PRIVATE="[0|1]" TAGS="[tags]"&gt;[title]&lt;/A&gt;</pre>
+			<p> Then, import it (preserving all the information <em>except</em> for the
+            private field) as simply as </p>
+			<pre>curl -T delicious.html -H "X-Nofussbm-Key: $KEY" http://$HOST/api/v1/import</pre>
 		</div>
 	</div>
 	</section>
