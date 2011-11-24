@@ -194,7 +194,7 @@ def put():
 			_id = bm[ 'id' ]
 			clean_bm( bm )
 			bm[ 'date-modified' ] = datetime.utcnow()
-			ret = g.db.bookmarks.update( { '_id': _id  }, { '$set': bm }, safe = True )
+			ret = g.db.bookmarks.update( { '_id': _id, 'email': g.email }, { '$set': bm }, safe = True )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 		else:
@@ -208,7 +208,7 @@ def delete():
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
-			ret = g.db.bookmarks.remove( _id, safe = True )
+			ret = g.db.bookmarks.remove( { '_id': _id, 'email': g.email }, safe = True )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 		else:	
