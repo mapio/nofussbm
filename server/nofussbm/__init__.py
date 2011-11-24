@@ -4,7 +4,6 @@ from email.mime.text import MIMEText
 from functools import wraps
 from hashlib import sha1
 import hmac
-#from json import dumps
 from logging import StreamHandler, Formatter, getLogger, DEBUG
 from os import environ as ENV
 from smtplib import SMTP
@@ -14,7 +13,9 @@ from flask import Flask, make_response, request, g, redirect, url_for, json
 
 from pymongo import Connection
 from pymongo.errors import OperationFailure
-from bson.objectid import ObjectId, InvalidId
+
+from .helpers import setup_json
+setup_json( json ) # horrible hack to personalize decoding in Flask request.json
 
 
 # Let's go!
@@ -33,21 +34,16 @@ app.logger.setLevel( DEBUG )
 
 # Configure from the environment
 
-app.secret_key = ENV[ 'SECRET_KEY' ]
-
-
-from .helpers import setup_json
-setup_json( json )
-
 try:
     ENV[ 'GZIPMW' ]
-    from gzipmw import GzipMiddleware
+    from .helpers import GzipMiddleware
     extapp = GzipMiddleware( app )
     app.logger.info( 'Using GzipMiddleware')
 except:
     extapp = app
 
 class Config( object ):
+	SECRET_KEY = ENV[ 'SECRET_KEY' ]
 	MONGOLAB_URI = ENV[ 'MONGOLAB_URI' ]
 	SENDGRID_USERNAME = ENV[ 'SENDGRID_USERNAME' ]
 	SENDGRID_PASSWORD = ENV[ 'SENDGRID_PASSWORD' ]
@@ -65,14 +61,14 @@ def send_mail( frm, to, subject, body ):
 	s.quit()
 
 def new_key( email ):
-	return b64encode( '{0}:{1}'.format( email, hmac.new( app.secret_key, email, sha1 ).hexdigest() ) )
+	return b64encode( '{0}:{1}'.format( email, hmac.new( Config.SECRET_KEY, email, sha1 ).hexdigest() ) )
 
 def check_key( key ):
 	try:
 		email, signature = b64decode( key ).split( ':' )
 	except ( TypeError, ValueError ):
 		return None
-	if signature == hmac.new( app.secret_key, email, sha1 ).hexdigest():
+	if signature == hmac.new( Config.SECRET_KEY, email, sha1 ).hexdigest():
 		return email
 	else:
 		return None
