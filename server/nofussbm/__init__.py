@@ -210,3 +210,28 @@ def delete():
 		else:	
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
 	return myjsonify( result )
+
+# Delicious import hack
+
+@app.route( API_PREFIX + '/import', methods = [ 'PUT' ] )
+@key_required
+def delicious_import():
+	bms = []
+	for line in request.data.splitlines():
+		if line.startswith( '<DT>' ):
+			parts = line.split( '>' )
+			attrs = parts[1].split( '"' )
+			bm = {
+				'email': g.email,
+				'date-added': datetime.utcfromtimestamp( float( attrs[ 3 ] ) ),
+				'url': attrs[ 1 ], 
+				'title': parts[ 2 ][ : -3 ],
+				'tags': map( lambda _: _.strip(), attrs[ 7 ].split( ',' ) )
+			}
+			bms.append( bm )
+	try:
+		_id = g.db.bookmarks.insert( bms, safe = True )
+	except OperationFailure:
+		return textify( 'error' )
+	else:
+		return textify( 'success' )
