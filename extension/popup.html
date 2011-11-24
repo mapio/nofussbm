@@ -28,7 +28,7 @@
 					form.status.value = 'An error has occurred';
 				}
 			}
-			req.open( "POST", "http://nofussbm-mapio.rhcloud.com/", true );
+			req.open( "POST", "http://nofussbm.herokuapp.com/", true );
 			req.setRequestHeader( "Content-Type", "application/json" );
 			req.setRequestHeader( "X-Nofussbm", key );
 			req.send( data );
