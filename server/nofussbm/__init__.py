@@ -7,7 +7,6 @@ import hmac
 from logging import StreamHandler, Formatter, getLogger, DEBUG
 from os import environ as ENV
 from smtplib import SMTP
-from urllib2 import unquote
 
 from flask import Flask, make_response, request, g, redirect, url_for, json
 
@@ -131,13 +130,13 @@ def key( email ):
 	return ''
 
 @app.route( '/list/<email>' )
-@app.route( '/list/<email>/tag/<tags>' )
 def list( email, tags = None ):
-	if tags: 
-		tags = map( lambda _: _.strip(), unquote( tags ).split( ',' ) )
-		query = { 'email': email, 'tags' : { '$all' : tags } }
-	else:
-		query = { 'email': email }
+	query = { 'email': email }
+	if 'tags' in request.args: 
+		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
+		query[ 'tags' ] = { '$all': tags }
+	if 'title' in request.args: 
+		query[ 'title' ] = { '$regex': request.args[ 'title' ] }
 	result = []
 	try:
 		for bm in g.db.bookmarks.find( query ):
