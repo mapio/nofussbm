@@ -20,8 +20,15 @@ def setup_json( json ):
 					res[ 'id' ] = ObjectId( value )
 				except InvalidId:
 					pass
-			if key == 'tags':
+			elif key == 'tags':
 				res[ 'tags' ] = map( lambda _: _.strip(), value.split( ',' ) )
+			elif key.startswith( 'date-' ):
+				try:
+					res[ key ] = datetime.strptime( value, DATETIME_FORMAT )
+				except:
+					pass
+			else:
+				res[ key ] = value
 		return res
 
 	class Encoder( JSONEncoder ):

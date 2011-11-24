@@ -77,6 +77,14 @@ def check_key( key ):
 	else:
 		return None
 
+def clean_bm( bm ):
+	for key in 'id', 'email', 'date-added', 'date-modified':
+		try:
+			del bm[ key ]
+		except KeyError:
+			pass
+	return bm
+	
 def textify( text ):
 	response = make_response( text + '\n' )
 	response.headers[ 'Content-Type' ] = 'text/plain; charset=UTF-8'
@@ -152,12 +160,9 @@ API_PREFIX = '/api/v1'
 def post():
 	result = { 'error': [], 'added': [] }
 	for pos, bm in enumerate( request.json ):
+		clean_bm( bm )
 		bm[ 'email' ] = g.email
 		bm[ 'date-added' ] = datetime.utcnow()
-		try:
-			del bm[ 'id' ]
-		except KeyError:
-			pass
 		try:
 			_id = g.db.bookmarks.insert( bm, safe = True )
 		except OperationFailure:
@@ -172,8 +177,7 @@ def get():
 	result = []
 	try:
 		for bm in g.db.bookmarks.find( { 'email': g.email } ):
-			bm[ 'id' ] = bm[ '_id' ]
-			del bm[ '_id' ]
+			bm[ 'id' ] = bm[ '_id' ]; del bm[ '_id' ]
 			del bm[ 'email' ]
 			bm[ 'tags' ] = u','.join( bm[ 'tags' ] )
 			result.append( bm )
@@ -188,8 +192,7 @@ def put():
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
-			del bm[ 'id' ]
-			bm[ 'email' ] = g.email
+			clean_bm( bm )
 			bm[ 'date-modified' ] = datetime.utcnow()
 			ret = g.db.bookmarks.update( { '_id': _id  }, { '$set': bm }, safe = True )
 		except ( KeyError, OperationFailure ):
@@ -211,4 +214,3 @@ def delete():
 		else:	
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
 	return myjsonify( result )
-
