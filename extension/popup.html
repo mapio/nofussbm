@@ -23,14 +23,19 @@
 			var req = new XMLHttpRequest();
 			req.onreadystatechange = function() {
 				if( this.readyState == 4 && this.status == 200 ) {
-					form.status.value = req.responseText;
+					response = JSON.parse( req.responseText )
+					if ( response[ "added" ].length ) {
+						form.status.value = "Added Bookmark, id = " + response[ "added" ][ 0 ];
+					} else {
+						form.status.value = 'The bookmark was not added';
+					}
 				} else if ( this.readyState == 4 && this.status != 200 ) {
 					form.status.value = 'An error has occurred';
 				}
 			}
-			req.open( "POST", "http://nofussbm.herokuapp.com/", true );
+			req.open( "POST", "http://nofussbm.herokuapp.com/api/v1/", true );
 			req.setRequestHeader( "Content-Type", "application/json" );
-			req.setRequestHeader( "X-Nofussbm", key );
+			req.setRequestHeader( "X-Nofussbm-Key", key );
 			req.send( data );
 			console.log( data );
 		}
