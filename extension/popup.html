@@ -19,7 +19,7 @@
 			} );
 		}
 		function postUrl() {
-			var data = JSON.stringify( { "url": form.url.value, "title": form.title.value, "tags": form.tags.value } );
+			var data = JSON.stringify( [ { "url": form.url.value, "title": form.title.value, "tags": form.tags.value } ] );
 			var req = new XMLHttpRequest();
 			req.onreadystatechange = function() {
 				if( this.readyState == 4 && this.status == 200 ) {

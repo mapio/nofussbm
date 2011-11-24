@@ -136,7 +136,7 @@ def list( email ):
 		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
 		query[ 'tags' ] = { '$all': tags }
 	if 'title' in request.args: 
-		query[ 'title' ] = { '$regex': '/{0}/i'.format( request.args[ 'title' ] ) }
+		query[ 'title' ] = { '$regex': request.args[ 'title' ], '$options': 'i' }
 	result = []
 	try:
 		for bm in g.db.bookmarks.find( query ):
