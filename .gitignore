@@ -1,6 +1,5 @@
 *.log
 *.pem
-*.crx
 *.json
 .env
 packed

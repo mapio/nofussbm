@@ -2,7 +2,6 @@ syntax: glob
 
 *.log
 *.pem
-*.crx
 *.json
 .env
 packed
