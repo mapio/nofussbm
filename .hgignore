@@ -4,3 +4,5 @@ syntax: glob
 *.pem
 *.crx
 *.json
+.env
+packed
