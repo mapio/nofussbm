@@ -1,0 +1,19 @@
+#!/bin/bash
+
+URL='https://127.0.0.1:8000/api/v1/'
+URL='https://nofussbm.herokuapp.com/api/v1/'
+SHOW_HEADERS=
+
+METHOD=$1
+
+case $METHOD in
+	GET|get)
+	curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
+	DELETE|delete|del)
+	curl $SHOW_HEADERS -d @- -X DELETE -H "Content-type: application/json" -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
+	POST|post)
+	curl $SHOW_HEADERS -d @- -X POST -H "Content-type: application/json" -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
+	PUT|put)
+	curl $SHOW_HEADERS -d @- -X PUT -H "Content-type: application/json" -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
+esac
+

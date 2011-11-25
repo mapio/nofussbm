@@ -1,0 +1,3 @@
+#!/bin/bash
+
+heroku config --app nofussbm -s | egrep '(MONGOLAB_URI|SECRET_KEY|SENDGRID_PASSWORD|SENDGRID_USERNAME)' > .env
