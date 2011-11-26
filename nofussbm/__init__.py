@@ -142,9 +142,9 @@ def list( ident ):
 	else: 
 		try:
 			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
-		except OperationFailure:
+			email = alias[ 'email' ]
+		except ( TypeError, OperationFailure ):
 			return ''
-		email = alias[ 'email' ]
 	query = { 'email': email }
 	if 'tags' in request.args: 
 		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
