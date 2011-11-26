@@ -28,7 +28,7 @@ from smtplib import SMTP
 from flask import Flask, make_response, request, g, redirect, url_for, json
 
 from pymongo import Connection
-from pymongo.errors import OperationFailure
+from pymongo.errors import OperationFailure, DuplicateKeyError
 
 from .helpers import setup_json
 setup_json( json ) # horrible hack to personalize decoding in Flask request.json
@@ -132,8 +132,19 @@ def key_required( f ):
 def index():
 	return redirect( url_for( 'static', filename = 'signup.html' ) )
 
-@app.route( '/<email>' )
-def list( email ):
+@app.route( '/favicon.ico' )
+def favicon():
+	return redirect( url_for( 'static', filename = 'favicon.ico' ) )
+
+@app.route( '/<ident>' )
+def list( ident ):
+	if '@' in ident: email = ident
+	else: 
+		try:
+			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
+		except OperationFailure:
+			return ''
+		email = alias[ 'email' ]
 	query = { 'email': email }
 	if 'tags' in request.args: 
 		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
@@ -145,7 +156,7 @@ def list( email ):
 		for bm in g.db.bookmarks.find( query ):
 			date = bm[ 'date-modified' ] if 'date-modified' in bm else bm[ 'date-added' ]
 			result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
-	except:
+	except OperationFailure:
 		result = []
 	return textify( u'\n'.join( result ) )
 
@@ -180,7 +191,7 @@ def get():
 			del bm[ 'email' ]
 			bm[ 'tags' ] = u','.join( bm[ 'tags' ] )
 			result.append( bm )
-	except:
+	except OperationFailure:
 		result = []
 	return myjsonify( result )
 
@@ -214,15 +225,34 @@ def delete():
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
 	return myjsonify( result )
 
-# signup helper
+# signup and alias helpers
 
-@app.route( API_PREFIX + '/getkey', methods = [ 'GET' ] )
-def key():
+@app.route( API_PREFIX + '/sendkey', methods = [ 'POST' ] )
+def sendkey():
 	email = request.args[ 'email' ]
 	key = new_key( email )
 	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
 	send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
 	return ''
+
+@app.route( API_PREFIX + '/setalias/<alias>', methods = [ 'POST' ] )
+@key_required
+def setalias( alias ):
+	result = { 'status': 'set' }
+	try:
+		_id = g.db.aliases.insert( { 'alias': alias, 'email': g.email }, safe = True )
+	except DuplicateKeyError:
+		result[ 'status' ] = 'duplicate'
+		return myjsonify( result )
+	except OperationFailure:
+		result[ 'status' ] = 'server error'
+		return myjsonify( result )
+	try:
+		g.db.aliases.remove( { 'email': g.email, '_id' : { '$ne': _id } } )
+	except OperationFailure:
+		result[ 'status' ] = 'server error'
+		return myjsonify( result )
+	return myjsonify( result )
 
 # Delicious import hack
 

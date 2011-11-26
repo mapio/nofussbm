@@ -1,22 +1,4 @@
 <!DOCTYPE html>
-<!--
- Copyright 2011, Massimo Santini <santini@dsi.unimi.it>
- 
- This file is part of "No Fuss Bookmarks".
- 
- "No Fuss Bookmarks" is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the Free
- Software Foundation, either version 3 of the License, or (at your option) any
- later version.
- 
- "No Fuss Bookmarks" is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- details.
- 
- You should have received a copy of the GNU General Public License along with
- "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
--->
 <html lang="en">
 <head>
 	<meta charset="utf-8">
@@ -39,29 +21,51 @@
 			backdrop: true
 		} );
 		$( '#getkey' ).click( function () {
-			$.get( '/api/v1/getkey', { email: $( '#email' ).val() }, function() {
+			$.get( '/api/v1/sendkey/' + $( '#email' ).val(), function() {
 				$( '#feedback' ).modal( 'show' );
 			} );
 		} );
 	});</script>
 	<style type="text/css">
-	body {	padding-top: 60px; }
-	section { padding-top: 60px; }
-	section > .row { margin-bottom: 10px; }
-	footer { margin-top: 60px;}
+		body {	padding-top: 60px; }
+		section { padding-top: 60px; }
+		section > .row { margin-bottom: 10px; }
+		footer { margin-top: 60px;}
+		h2 {margin-bottom: 10px;}
 	</style>
 	<script type="text/javascript">
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-377250-12']);
-	  _gaq.push(['_trackPageview']);
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-377250-12']);
+		_gaq.push(['_trackPageview']);
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
 	</script>
 </head>
-<body><div class="container">
+<body>
+	
+	<!--
+	 Copyright 2011, Massimo Santini <santini@dsi.unimi.it>
+
+	 This file is part of "No Fuss Bookmarks".
+
+	 "No Fuss Bookmarks" is free software: you can redistribute it and/or modify it
+	 under the terms of the GNU General Public License as published by the Free
+	 Software Foundation, either version 3 of the License, or (at your option) any
+	 later version.
+
+	 "No Fuss Bookmarks" is distributed in the hope that it will be useful, but
+	 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+	 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+	 details.
+
+	 You should have received a copy of the GNU General Public License along with
+	 "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
+	-->
+	
+	<div class="container">
 	<a href="https://github.com/mapio/nofussbm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="_/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
 	<div class="hero-unit">
@@ -73,8 +77,9 @@
 			<p> The <em>software</em> is a simple <a href="http://en.wikipedia.org/wiki/Representational_state_transfer">REST</a>ful
             server, written using <a href="http://flask.pocoo.org/">Flask</a>, providing a <a
             href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a> interface to a <a
-            href="http://www.mongodb.org/">mongoDB</a> store, plus a very basic <a href="http://www.google.com/chrome">Google Chrome</a>
-            extension to submit bookmarks. The code is open source and available from <a
+            href="http://www.mongodb.org/">mongoDB</a> store, plus a very basic <a href="http://www.google.com/chrome">Google
+            Chrome</a> extension to submit bookmarks. The code is released under the <a
+            href="http://www.gnu.org/copyleft/gpl.html">GPL</a> and available from <a
             href="https://github.com/mapio/nofussbm">GitHub</a>. </p>
 			<p> The <em>service</em> is just an incarnation of such software hosted by <a href="http://www.heroku.com/">heroku</a>
             and <a href="https://mongolab.com/">mongolab</a> that you can freely use just submitting your email below to obtain your
@@ -105,7 +110,8 @@
 			<h2>Submit bookmarks</h2>
 		</div>
 		<div class="span12">
-			<p> Install the <a href="nofussbm.crx">No Fuss Bookmark</a> Chrome extension that will, by default, use this server as a backend.</p>
+			<p> Install the <a href="nofussbm.crx">No Fuss Bookmark</a> Chrome extension that will, by default, use this server as a
+            backend.</p>
 			<p> <span class="label warning">Attention</span> After installing it, point your Chrome browser at
             <code>chrome://settings/extensionSettings</code> and, follow the "Option" link of the extension, enter the API key you
             got submitting your email in the above form. </p>
@@ -121,7 +127,8 @@
 		<div class="span12">
 			<p> Point your browser at <code>http://nofussbm.herokuapp.com/&lt;EMAIL&gt;</code>, where <code>&lt;EMAIL&gt;</code> is
             your email, to get a list of all your bookmarks as a (tab separated) text file (that you can, for instance, conveniently
-            <kbd>grep</kbd>, or <kbd>sort</kbd>). </p>
+            <kbd>grep</kbd>, or <kbd>sort</kbd>); moreover you can set an <em>alias</em> if your email is just too long (see the <a
+            href="#expfeat">API section</a> for instructions). </p>
 			<p> You can optionally filter such list by <em>tag</em> and/or <em>title</em> adding to the above URL a (suitably <a
             href="http://en.wikipedia.org/wiki/Percent-encoding">encoded</a>) <a
             href="http://en.wikipedia.org/wiki/Query_string">query string</a> with the field <code>tags</code> having as value a
@@ -138,7 +145,7 @@
 		</div>
 		<div class="span12">
 			<p> <span class="label important">Important</span> You can easily export your bookmarks from the <em>now fussy</em> <a
-            href="http://delicious.com/">Delicious</a> and import them here! Read the last paragraph of the next section for
+            href="http://delicious.com/">Delicious</a> and import them here! See the <a href="#expfeat">API section</a> for
             instructions. </p>
 		</div>
 	</div>
@@ -148,6 +155,7 @@
 	<div class="page-header"><h1>The API <small>command line gives you the power</small></h1></div>	
 	<div class="row">
 		<div class="span16">
+			<h2>Create, Read, Update, Delete</h2>
 			<p> The API are so simple that you can perform all the CRUD operations from the command line, using simple tools such
             as, for instance, <a href="http://curl.haxx.se/">cURL</a>. </p>
 			<p> Assume that <code>KEY</code> contains your API key (for instance, the one you got submitting your email in the above
@@ -175,13 +183,18 @@
 			<pre>curl -X PUT -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
 			<p> Finally, you can <strong>delete</strong> bookmarks (matching the <code>id</code>) in <code>bms.json</code> with</p>
 			<pre>curl -X DELETE -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
-			<p style="padding-top: 20px;"> <span class="label important">Important</span> You can <strong>import</strong> your <a
+			<h2 id="expfeat">Experimental features</h2>
+			<p> <span class="label important">Important</span> You can <strong>import</strong> your <a
             href="http://delicious.com/">Delicious</a> bookmarks as follows: first, export them from their site and you should get
             an HTML file (usually named <code>delicious.html</code>) containing a sequence of lines of the form </p>
 			<pre>&lt;DT&gt;&lt;A HREF="[url]" ADD_DATE="[timestamp]" PRIVATE="[0|1]" TAGS="[tags]"&gt;[title]&lt;/A&gt;</pre>
-			<p> Then, import it (preserving all the information <em>except</em> for the
-            private field) as simply as </p>
+			<p> Then, import it (preserving all the information <em>except</em> for the <code>PRIVATE</code> field) as simply as </p>
 			<pre>curl -T delicious.html -H "X-Nofussbm-Key: $KEY" http://$HOST/api/v1/import</pre>
+			<p> If you feel that your email is too long, or you want to post somewhere the list of your bookmarks without reveailng
+            your identity, you can setup an <strong>alias</strong> as follows </p>
+			<pre>curl -X POST -H "X-Nofussbm-Key: $KEY" http://$HOST/api/v1/setalias/&lt;YOUR_ALIAS&gt;</pre>
+			<p> where <code>&lt;YOUR_ALIAS&gt;</code> is any word of your choice (look at the answer to see if, in case of
+            duplicates, your request wasnt satisfyed). </p>
 		</div>
 	</div>
 	</section>
@@ -195,4 +208,3 @@
 
 </div></body> 
 </html>
-

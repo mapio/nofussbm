@@ -16,9 +16,7 @@
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
-import gzip
 from json import JSONEncoder, JSONDecoder
-import StringIO
 
 from bson.objectid import ObjectId, InvalidId
 
