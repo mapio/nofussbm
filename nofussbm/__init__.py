@@ -56,6 +56,7 @@ class Config( object ):
 	SENDGRID_USERNAME = ENV[ 'SENDGRID_USERNAME' ]
 	SENDGRID_PASSWORD = ENV[ 'SENDGRID_PASSWORD' ]
 
+
 # Utility functions
 
 def send_mail( frm, to, subject, body ):
@@ -131,14 +132,7 @@ def key_required( f ):
 def index():
 	return redirect( url_for( 'static', filename = 'signup.html' ) )
 
-@app.route( '/getkey/<email>' )
-def key( email ):
-	key = new_key( email )
-	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
-	send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
-	return ''
-
-@app.route( '/list/<email>' )
+@app.route( '/<email>' )
 def list( email ):
 	query = { 'email': email }
 	if 'tags' in request.args: 
@@ -149,7 +143,8 @@ def list( email ):
 	result = []
 	try:
 		for bm in g.db.bookmarks.find( query ):
-			result.append( u'\t'.join( ( bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+			date = bm[ 'date-modified' ] if 'date-modified' in bm else bm[ 'date-added' ]
+			result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
 	except:
 		result = []
 	return textify( u'\n'.join( result ) )
@@ -218,6 +213,16 @@ def delete():
 		else:	
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
 	return myjsonify( result )
+
+# signup helper
+
+@app.route( API_PREFIX + '/getkey', methods = [ 'GET' ] )
+def key():
+	email = request.args[ 'email' ]
+	key = new_key( email )
+	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
+	send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
+	return ''
 
 # Delicious import hack
 

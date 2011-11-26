@@ -39,7 +39,7 @@
 			backdrop: true
 		} );
 		$( '#getkey' ).click( function () {
-			$.get( '/getkey/' + $( '#email' ).val(), function() {
+			$.get( '/api/v1/getkey', { email: $( '#email' ).val() }, function() {
 				$( '#feedback' ).modal( 'show' );
 			} );
 		} );
@@ -119,17 +119,17 @@
 			<h2>Get bookmarks</h2>
 		</div>
 		<div class="span12">
-			<p> Point your browser at <code>http://nofussbm.herokuapp.com/list/&lt;EMAIL&gt;</code>, where
-            <code>&lt;EMAIL&gt;</code> is your email, to get a list of all your bookmarks as a (tab separated) text file (that you
-            can, for instance, conveniently <kbd>grep</kbd>, or <kbd>sort</kbd>). </p>
+			<p> Point your browser at <code>http://nofussbm.herokuapp.com/&lt;EMAIL&gt;</code>, where <code>&lt;EMAIL&gt;</code> is
+            your email, to get a list of all your bookmarks as a (tab separated) text file (that you can, for instance, conveniently
+            <kbd>grep</kbd>, or <kbd>sort</kbd>). </p>
 			<p> You can optionally filter such list by <em>tag</em> and/or <em>title</em> adding to the above URL a (suitably <a
             href="http://en.wikipedia.org/wiki/Percent-encoding">encoded</a>) <a
             href="http://en.wikipedia.org/wiki/Query_string">query string</a> with the field <code>tags</code> having as value a
             (comma separated list) of tags that will all match, and/or the field <code>title</code> having as value a string that
             will match as a (case insensitive) substring. </p>
 			<p> <span class="label warning">Attention</span> All bookmarks are <strong>public</strong>, anyone with your email can
-            get your bookmarks. For instance, you can see a list of <a href="/list/massimo.santini@gmail.com">all my bookmarks</a>,
-            or just the one <a href="/list/massimo.santini@gmail.com?tags=python">tagged with Python</a>. </p>
+            get your bookmarks. For instance, you can see a list of <a href="/massimo.santini@gmail.com">all my bookmarks</a>,
+            or just the one <a href="/massimo.santini@gmail.com?tags=python">tagged with Python</a>. </p>
 		</div> 
 	</div> 
 	<div class="row">
@@ -160,9 +160,9 @@
   "tags": "flask,mongodb,python,bookmarks"
 }]</pre>
 			<p> Them, you can <strong>create</strong> such a bookmark by the following command </p>
-			<pre class="prettyprint lang-sh">curl -X POST -d @bm.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+			<pre>curl -X POST -d @bm.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
 			<p> Hence, you can <strong>read</strong> your bookmarks (and record them in the <code>bms.json</code> file) using </p>
-			<pre class="prettyprint lang-sh">curl -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL > bms.json</pre>
+			<pre>curl -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL > bms.json</pre>
 			<p> If the store was initially empty and you added just <code>bm.json</code>, then <code>bms.json</code> will contain
 			<pre>[{
   "date-added": "2011-11-24 21:33:50.290000", 
@@ -172,9 +172,9 @@
   "url": "https://github.com/mapio/nofussbm"
 }]</pre>
 			<p> If you want, you can edit <code>bms.json</code> and then <strong>update</strong> (matching bookmarks by <code>id</code>) the store with </p>
-			<pre class="prettyprint lang-sh">curl -X PUT -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+			<pre>curl -X PUT -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
 			<p> Finally, you can <strong>delete</strong> bookmarks (matching the <code>id</code>) in <code>bms.json</code> with</p>
-			<pre class="prettyprint lang-sh">curl -X DELETE -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
+			<pre>curl -X DELETE -d @bms.json -H "Content-type: application/json" -H "X-Nofussbm-Key: $KEY" $URL</pre>
 			<p style="padding-top: 20px;"> <span class="label important">Important</span> You can <strong>import</strong> your <a
             href="http://delicious.com/">Delicious</a> bookmarks as follows: first, export them from their site and you should get
             an HTML file (usually named <code>delicious.html</code>) containing a sequence of lines of the form </p>
