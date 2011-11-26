@@ -50,14 +50,6 @@ app.logger.setLevel( DEBUG )
 
 # Configure from the environment
 
-try:
-    ENV[ 'GZIPMW' ]
-    from .helpers import GzipMiddleware
-    extapp = GzipMiddleware( app )
-    app.logger.info( 'Using GzipMiddleware')
-except:
-    extapp = app
-
 class Config( object ):
 	SECRET_KEY = ENV[ 'SECRET_KEY' ]
 	MONGOLAB_URI = ENV[ 'MONGOLAB_URI' ]
