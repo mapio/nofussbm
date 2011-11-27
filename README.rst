@@ -1,6 +1,12 @@
 No Fuss Bookmarks
 =================
 
+.. |flattr| image:: http://api.flattr.com/button/flattr-badge-large.png
+  :alt: Flattr this git repo
+  :target: http://flattr.com/thing/442420/No-Fuss-Bookmarks
+
+|flattr| 
+
 No Fuss Bookmarks is a very simple **software** and **service** to store bookmarks especially designed for hackers (that don't need
 fancy interfaces, but **nice API**).
 
