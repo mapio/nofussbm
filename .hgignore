@@ -5,3 +5,4 @@ syntax: glob
 *.json
 .env
 packed
+dump
