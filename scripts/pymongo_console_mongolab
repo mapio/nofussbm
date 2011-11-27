@@ -1,0 +1,15 @@
+#!/usr/bin/env python -i
+
+from subprocess import check_output as run
+from sys import argv
+from urlparse import urlparse
+
+from pymongo import Connection
+
+app = argv[ 1 ]
+print app
+conf = run( 'heroku config --app {0} -s'.format( app ), shell = True )
+uri = filter( lambda _ : _.startswith( 'MONGOLAB_URI' ), conf.splitlines() )[ 0 ].split( '=' )[ 1 ]
+parsed = urlparse( uri )
+conn = Connection( uri )
+db = conn[ parsed.path[ 1: ] ]
