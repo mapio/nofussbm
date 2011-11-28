@@ -9,7 +9,7 @@
 			form = document.forms.bookmarks;
 			key = localStorage.getItem( "key" );
 			if ( ! key ) {
-				alert( "Please set your API key in nofussbm options" );
+				alert( "Please set your API key in extension's options" );
 			} 
 			chrome.tabs.getSelected( null, function( tab ) {
 				chrome.tabs.sendRequest( tab.id, {}, function handler( response ) {
