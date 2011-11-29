@@ -98,7 +98,7 @@ def textify( text, code = 200 ):
 	response.headers[ 'Content-Type' ] = 'text/plain; charset=UTF-8'
 	return response
 
-def myjsonify( data = None, headers = None, code = 200 ):
+def myjsonify( data = None, code = 200, headers = None ):
 	data = [] if not data else data
 	response = make_response( json.dumps( data, indent = 4, sort_keys = True, ensure_ascii = False ) + '\n', code )
 	response.headers[ 'Content-Type' ] = 'application/json; charset=UTF-8'
@@ -240,7 +240,7 @@ def get():
 			bm[ 'tags' ] = u','.join( bm[ 'tags' ] )
 			result.append( bm )
 	except OperationFailure:
-		return myjsonify( [], code = 500 )
+		return myjsonify( code = 500 )
 	return myjsonify( result, headers = { 'Content-Range': 'bookmarks {0}-{1}/{2}'.format( skip, skip + ( limit - 1 if limit else n ), n ), 'Accept-Ranges': 'bookmarks' } )
 
 @app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
