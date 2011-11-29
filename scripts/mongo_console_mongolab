@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+from subprocess import check_output as run
+from sys import argv
+from urlparse import urlparse
+
+app = argv[ 1 ]
+conf = run( 'heroku config --app {0} -s'.format( app ), shell = True )
+uri = filter( lambda _ : _.startswith( 'MONGOLAB_URI' ), conf.splitlines() )[ 0 ].split( '=' )[ 1 ]
+parsed = urlparse( uri )
+print 'mongo -u {0.username} -p {0.password} {0.hostname}:{0.port}/{1}'.format( parsed, parsed.path[ 1: ] )

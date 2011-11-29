@@ -23,7 +23,9 @@ from hashlib import sha1
 import hmac
 from logging import StreamHandler, Formatter, getLogger, DEBUG
 from os import environ as ENV
+import re
 from smtplib import SMTP
+from urlparse import parse_qs
 
 from flask import Flask, make_response, request, g, redirect, url_for, json
 
@@ -48,7 +50,7 @@ app.logger.addHandler( stderr_handler )
 app.logger.setLevel( DEBUG )
 
 
-# Configure from the environment
+# Configure from the environment, global (immutable) variables 
 
 class Config( object ):
 	SECRET_KEY = ENV[ 'SECRET_KEY' ]
@@ -56,6 +58,7 @@ class Config( object ):
 	SENDGRID_USERNAME = ENV[ 'SENDGRID_USERNAME' ]
 	SENDGRID_PASSWORD = ENV[ 'SENDGRID_PASSWORD' ]
 
+RANGE_RE = re.compile( r'bookmarks=(\d+)(-(\d+))?' )
 
 # Utility functions
 
@@ -90,14 +93,17 @@ def clean_bm( bm ):
 			pass
 	return bm
 	
-def textify( text ):
-	response = make_response( text + '\n' )
+def textify( text, code = 200 ):
+	response = make_response( text + '\n', code )
 	response.headers[ 'Content-Type' ] = 'text/plain; charset=UTF-8'
 	return response
 
-def myjsonify( data ):
-	response = make_response( json.dumps( data, indent = 4, sort_keys = True, ensure_ascii = False ) + '\n' )
+def myjsonify( data = None, headers = None, code = 200 ):
+	data = [] if not data else data
+	response = make_response( json.dumps( data, indent = 4, sort_keys = True, ensure_ascii = False ) + '\n', code )
 	response.headers[ 'Content-Type' ] = 'application/json; charset=UTF-8'
+	if headers: 
+		for k,v in headers.items(): response.headers[ k ] = v
 	return response
 	
 @app.before_request
@@ -138,29 +144,48 @@ def favicon():
 
 @app.route( '/<ident>' )
 def list( ident ):
+	args = request.args
 	if '@' in ident: email = ident
 	else: 
 		try:
 			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
 			email = alias[ 'email' ]
-		except ( TypeError, OperationFailure ):
-			return ''
+		except TypeError:
+			return '', 404
+		except OperationFailure:
+			return '', 500
 	query = { 'email': email }
-	if 'tags' in request.args: 
-		tags = map( lambda _: _.strip(), request.args[ 'tags' ].split( ',' ) )
+	if 'tags' in args: 
+		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
 		query[ 'tags' ] = { '$all': tags }
-	if 'title' in request.args: 
-		query[ 'title' ] = { '$regex': request.args[ 'title' ], '$options': 'i' }
+	if 'title' in args: 
+		query[ 'title' ] = { '$regex': args[ 'title' ], '$options': 'i' }
+	if 'skip' in args:
+		skip = int( args[ 'skip' ] )
+	else:
+		skip = 0
+	if 'limit' in args:
+		limit = int( args[ 'limit' ] )
+	else:
+		limit = 0		
 	result = []
 	try:
-		for bm in g.db.bookmarks.find( query ):
-			date = bm[ 'date-modified' ] if 'date-modified' in bm else bm[ 'date-added' ]
+		for bm in g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] ):
+			date = bm[ 'date-modified' ]
 			result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
 	except OperationFailure:
-		result = []
+		return '', 500
 	return textify( u'\n'.join( result ) )
 
-
+@app.route( '/stats' )
+def stats():
+	result = {}
+	try:
+		result[ 'users' ] = g.db.bookmarks.group( { 'email': 1 }, None, { 'count': 0 }, 'function( o, p ){ p.count++; }' )
+	except OperationFailure:
+		return myjsonify( code = 500 )
+	return myjsonify( result )
+	
 # API "views"
 
 API_PREFIX = '/api/v1'
@@ -168,37 +193,61 @@ API_PREFIX = '/api/v1'
 @app.route( API_PREFIX + '/', methods = [ 'POST' ] )
 @key_required
 def post():
+	code = 200
 	result = { 'error': [], 'added': [] }
 	for pos, bm in enumerate( request.json ):
 		clean_bm( bm )
 		bm[ 'email' ] = g.email
-		bm[ 'date-added' ] = datetime.utcnow()
+		bm[ 'date-added' ] = bm[ 'date-modified' ] = datetime.utcnow()
 		try:
 			_id = g.db.bookmarks.insert( bm, safe = True )
 		except OperationFailure:
 			result[ 'error' ].append( '#{0}'.format( pos ) )
+			code = 500
 		else:
 			result[ 'added' ].append( _id )
-	return myjsonify( result )
+	return myjsonify( result, code )
 
 @app.route( API_PREFIX + '/', methods = [ 'GET' ] )
 @key_required
 def get():
 	result = []
+
+	skip = limit = 0
+	if 'Range' in request.headers:
+		m = RANGE_RE.match( request.headers[ 'Range' ] )
+		if m:
+			m = m.groups()
+			skip = int( m[ 0 ] )
+			limit = int( m[ 2 ] ) - skip + 1 if m[ 2 ] else 0 
+		if not m or limit < 0: return myjsonify( code = 416 )
+
+	query = { 'email': g.email }
+	if 'X-Nofussbm-query' in request.headers:
+		args = parse_qs( request.headers[ 'X-Nofussbm-query' ] )
+		if 'tags' in args: 
+			tags = map( lambda _: _.strip(), args[ 'tags' ][ 0 ].split( ',' ) )
+			query[ 'tags' ] = { '$all': tags }
+		if 'title' in args: 
+			query[ 'title' ] = { '$regex': args[ 'title' ][ 0 ], '$options': 'i' }
+
 	try:
-		for bm in g.db.bookmarks.find( { 'email': g.email } ):
+		cur = g.db.bookmarks.find( query, skip = skip, limit = limit )
+		n = cur.count()
+		for bm in cur:
 			bm[ 'id' ] = bm[ '_id' ]; del bm[ '_id' ]
 			del bm[ 'email' ]
 			bm[ 'tags' ] = u','.join( bm[ 'tags' ] )
 			result.append( bm )
 	except OperationFailure:
-		result = []
-	return myjsonify( result )
+		return myjsonify( [], code = 500 )
+	return myjsonify( result, headers = { 'Content-Range': 'bookmarks {0}-{1}/{2}'.format( skip, skip + ( limit - 1 if limit else n ), n ), 'Accept-Ranges': 'bookmarks' } )
 
 @app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
 @key_required
 def put():
 	result = { 'error': [], 'updated': [], 'ignored': [] }
+	code = 200
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
@@ -207,23 +256,26 @@ def put():
 			ret = g.db.bookmarks.update( { '_id': _id, 'email': g.email }, { '$set': bm }, safe = True )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
+			code = 500
 		else:
 			result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( _id )
-	return myjsonify( result )
+	return myjsonify( result, code )
 
 @app.route( API_PREFIX + '/', methods = [ 'DELETE' ] )
 @key_required
 def delete():
 	result = { 'error': [], 'deleted': [], 'ignored': [] }
+	code = 200
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
 			ret = g.db.bookmarks.remove( { '_id': _id, 'email': g.email }, safe = True )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
+			code = 500
 		else:	
 			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
-	return myjsonify( result )
+	return myjsonify( result, code )
 
 # signup and alias helpers
 
@@ -232,27 +284,30 @@ def sendkey():
 	email = request.args[ 'email' ]
 	key = new_key( email )
 	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
-	send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
+	try:
+		send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
+	except:
+		return '', 500
 	return ''
 
 @app.route( API_PREFIX + '/setalias/<alias>', methods = [ 'POST' ] )
 @key_required
 def setalias( alias ):
-	result = { 'status': 'set' }
+	result = {}
+	code = 200
 	try:
-		_id = g.db.aliases.insert( { 'alias': alias, 'email': g.email }, safe = True )
-	except DuplicateKeyError:
-		result[ 'status' ] = 'duplicate'
-		return myjsonify( result )
+		old = g.db.aliases.find_and_modify( { 'email': g.email }, { '$set': { 'alias' : alias } }, upsert = True )
+		if 'alias' in old: result[ 'old' ] = old[ 'alias' ]
+		result[ 'status' ] = 'set'
 	except OperationFailure:
-		result[ 'status' ] = 'server error'
+		error = g.db.error()
+		if 'err' in error and 'duplicate' in error[ 'err' ]: 
+			result[ 'status' ] = 'duplicate'
+		else:
+			code = 500
+			result[ 'status' ] = 'server error'
 		return myjsonify( result )
-	try:
-		g.db.aliases.remove( { 'email': g.email, '_id' : { '$ne': _id } } )
-	except OperationFailure:
-		result[ 'status' ] = 'server error'
-		return myjsonify( result )
-	return myjsonify( result )
+	return myjsonify( result, code )
 
 # Delicious import hack
 
@@ -264,9 +319,11 @@ def delicious_import():
 		if line.startswith( '<DT>' ):
 			parts = line.split( '>' )
 			attrs = parts[1].split( '"' )
+			date = datetime.utcfromtimestamp( float( attrs[ 3 ] ) )
 			bm = {
 				'email': g.email,
-				'date-added': datetime.utcfromtimestamp( float( attrs[ 3 ] ) ),
+				'date-added': date,
+				'date-modified': date,
 				'url': attrs[ 1 ], 
 				'title': parts[ 2 ][ : -3 ],
 				'tags': map( lambda _: _.strip(), attrs[ 7 ].split( ',' ) )
@@ -275,6 +332,6 @@ def delicious_import():
 	try:
 		_id = g.db.bookmarks.insert( bms, safe = True )
 	except OperationFailure:
-		return textify( 'error' )
+		return textify( 'error', 500 )
 	else:
-		return textify( 'success' )
+		return textify( 'success' )	

@@ -1,0 +1,42 @@
+2011-11-29  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Added range and query support for REST GET view
+	* server: Added 'skip' and 'limit' query arguments to text list
+	* server: The text list is now sorted, added stats (user/#bookmarks), '/stats' URL is now reserver (un-aliasable)
+	* server: Alias addition/update is now handled with an atomic mongodb operation
+	* server: The 'date-modified' is set to 'date-added' if absent, databse have been updated accordingly
+	* scripts: Added a script to connect to mongolab via mongo cli
+	
+2011-11-27  Massimo Santini  <santini@dsi.unimi.it>
+
+	* scripts: Added a script to connect to mongolab (via pymongo) and dump databases
+	* server: Added ref to official extension on Chrome Web Store in signup page
+
+2011-11-26  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Added alias support, as suggested by Matteo
+	* extension: Cosmetic fix (icons...)
+	* server: INCOMPATIBLE CHANGE: Removed /list/, as suggested by Matteo
+	* server: Removed GZipMW
+
+2011-11-25  Massimo Santini  <santini@dsi.unimi.it>
+
+	* scripts: Added some heroku helper scripts
+	* Restructuring repo so that it can be directly used with heroku
+	* Added GPL
+	
+2011-11-24  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Streamlined tags and title search
+	* server: Added Delicious import
+	* server: BUGFIX: delete and update are based on id _and_ email
+	* server: Incoming json is cleaned-up (by removing all but some fileds)
+	* server: fixed docs and added legalese
+
+2011-11-23  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Added a signup page, tag search, PUT and DELETE, fixed list view
+
+2011-11-22  Massimo Santini  <santini@dsi.unimi.it>
+
+	* extension: first experiments
