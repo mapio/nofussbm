@@ -27,7 +27,7 @@ import re
 from smtplib import SMTP
 from urlparse import parse_qs
 
-from flask import Flask, make_response, request, g, redirect, url_for, json
+from flask import Flask, make_response, request, g, redirect, url_for, json, abort
 
 from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
@@ -151,9 +151,9 @@ def list( ident ):
 			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
 			email = alias[ 'email' ]
 		except TypeError:
-			return '', 404
+			abort( 404 )
 		except OperationFailure:
-			return '', 500
+			abort( 500 )
 	query = { 'email': email }
 	if 'tags' in args: 
 		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
@@ -174,7 +174,7 @@ def list( ident ):
 			date = bm[ 'date-modified' ]
 			result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
 	except OperationFailure:
-		return '', 500
+		abort( 500 )
 	return textify( u'\n'.join( result ) )
 
 @app.route( '/stats' )
@@ -183,7 +183,7 @@ def stats():
 	try:
 		result[ 'users' ] = g.db.bookmarks.group( { 'email': 1 }, None, { 'count': 0 }, 'function( o, p ){ p.count++; }' )
 	except OperationFailure:
-		return myjsonify( code = 500 )
+		abort( 500 )
 	return myjsonify( result )
 	
 # API "views"
@@ -220,7 +220,7 @@ def get():
 			m = m.groups()
 			skip = int( m[ 0 ] )
 			limit = int( m[ 2 ] ) - skip + 1 if m[ 2 ] else 0 
-		if not m or limit < 0: return myjsonify( code = 416 )
+		if not m or limit < 0: abort( 416 )
 
 	query = { 'email': g.email }
 	if 'X-Nofussbm-query' in request.headers:
@@ -240,7 +240,7 @@ def get():
 			bm[ 'tags' ] = u','.join( bm[ 'tags' ] )
 			result.append( bm )
 	except OperationFailure:
-		return myjsonify( code = 500 )
+		abort( 500 )
 	return myjsonify( result, headers = { 'Content-Range': 'bookmarks {0}-{1}/{2}'.format( skip, skip + ( limit - 1 if limit else n ), n ), 'Accept-Ranges': 'bookmarks' } )
 
 @app.route( API_PREFIX + '/', methods = [ 'PUT' ] )
@@ -287,7 +287,7 @@ def sendkey():
 	try:
 		send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
 	except:
-		return '', 500
+		abort( 500 )
 	return ''
 
 @app.route( API_PREFIX + '/setalias/<alias>', methods = [ 'POST' ] )
@@ -332,6 +332,6 @@ def delicious_import():
 	try:
 		_id = g.db.bookmarks.insert( bms, safe = True )
 	except OperationFailure:
-		return textify( 'error', 500 )
+		abort( 500 )
 	else:
-		return textify( 'success' )	
+		return textify( 'success' )
