@@ -2,6 +2,7 @@
 
 from os import environ as ENV
 from urlparse import urlparse
+from sys import argv
 
 from pymongo import Connection
 
@@ -12,9 +13,9 @@ MONGOLAB_URI = ENV[ 'MONGOLAB_URI' ]
 conn = Connection( MONGOLAB_URI )
 db = conn[ urlparse( MONGOLAB_URI ).path[ 1: ] ] 
 
-print 'ACCESS\n' + 80 * '-'
-for entry in db[ 'access-logs' ].find():
-	print entry['timestamp'].as_datetime(), entry['level'], entry['loggerName'], entry['message']
-print 'ERROR\n' + 80 * '-'
-for entry in db[ 'error-logs' ].find():
-	print entry['timestamp'].as_datetime(), entry['level'], entry['loggerName'], entry['message']
+if len( argv ) > 1 and argv[ 1 ] == '-e':
+	for entry in db[ 'error-logs' ].find():
+		print entry['timestamp'].as_datetime(), entry['message']
+else:
+	for entry in db[ 'access-logs' ].find():
+		print entry['message']
