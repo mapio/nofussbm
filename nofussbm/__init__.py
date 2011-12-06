@@ -27,7 +27,7 @@ import re
 from smtplib import SMTP
 from urlparse import parse_qs
 
-from flask import Flask, make_response, request, g, redirect, url_for, json, abort
+from flask import Flask, make_response, request, g, redirect, url_for, json, abort, render_template
 
 from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
@@ -136,7 +136,11 @@ def key_required( f ):
 
 @app.route( '/' )
 def index():
-	return redirect( url_for( 'static', filename = 'signup.html' ) )
+	return render_template( 'signup.html' )
+
+@app.route( '/list' )
+def hl():
+	return render_template( 'list.html' )
 
 @app.route( '/favicon.ico' )
 def favicon():
