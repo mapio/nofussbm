@@ -19,7 +19,6 @@
 	</script>
 	<script type="text/javascript" src="_/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="_/bootstrap-modal.js"></script>
-	<script type="text/javascript" src="https://api.flattr.com/js/0.6/load.js?mode=auto"></script>
 	<script type="text/javascript">$( document ).ready( function() {
 		$( '#feedback' ).modal( {
 			keyboard: true,
@@ -27,9 +26,9 @@
 		} );
 		$( '#email' ).keypress( function( e ) { if ( e.which == 13 ) return false; } );
 		$( '#getkey' ).click( function () {
-			$.get( '/api/v1/sendkey/' + $( '#email' ).val(), function() {
+			$.post( '/api/v1/sendkey', { email: $( '#email' ).val() }, function() {
 				$( '#feedback' ).modal( 'show' );
-			} ).error( function() { alert( "Something went wrong, please check you email address and try again." ); } );
+			} ).error( function() { alert( "Something went wrong, please verify the address you entered and try again." ); } );
 		} );
 	} );</script>
 	<style type="text/css">
@@ -92,7 +91,7 @@
             and <a href="https://mongolab.com/">mongolab</a> that you can freely use just submitting your email below to obtain your
             API key. </p>
 			<p> If you like this, please consider making a small donation <a href="http://flattr.com/thing/442420/No-Fuss-Bookmarks" target="_blank">
-			<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" align="absmiddle" /></a></p>
+			<img src="_/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" align="absmiddle" /></a></p>
 		</div>
 		<div class='row'><div class='offset2 span12'><form action="#" method="POST">
 			<fieldset>

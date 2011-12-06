@@ -281,7 +281,7 @@ def delete():
 
 @app.route( API_PREFIX + '/sendkey', methods = [ 'POST' ] )
 def sendkey():
-	email = request.args[ 'email' ]
+	email = request.form[ 'email' ]
 	key = new_key( email )
 	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
 	try:
