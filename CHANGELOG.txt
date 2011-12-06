@@ -1,3 +1,7 @@
+2011-12-06  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Added (very initial) support for html listing, just add ?html= to the / URL
+
 2011-11-29  Massimo Santini  <santini@dsi.unimi.it>
 
 	* server: Added range and query support for REST GET view
