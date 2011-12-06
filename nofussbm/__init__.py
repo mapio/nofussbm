@@ -105,7 +105,32 @@ def myjsonify( data = None, code = 200, headers = None ):
 	if headers: 
 		for k,v in headers.items(): response.headers[ k ] = v
 	return response
-	
+
+def list_query( ident, limit = None ):
+	args = request.args
+	if '@' in ident: email = ident
+	else: 
+		try:
+			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
+			email = alias[ 'email' ]
+		except TypeError:
+			abort( 404 )
+		except OperationFailure:
+			abort( 500 )
+	query = { 'email': email }
+	if 'tags' in args: 
+		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
+		query[ 'tags' ] = { '$all': tags }
+	if 'title' in args: 
+		query[ 'title' ] = { '$regex': args[ 'title' ], '$options': 'i' }
+	if 'skip' in args:
+		skip = int( args[ 'skip' ] )
+	else:
+		skip = 0
+	if not limit:
+		limit = int( args[ 'limit' ] ) if 'limit' in args else 0
+	return g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] )
+
 @app.before_request
 def before_request():
 	g.conn = Connection( Config.MONGOLAB_URI )
@@ -138,48 +163,26 @@ def key_required( f ):
 def index():
 	return render_template( 'signup.html' )
 
-@app.route( '/list' )
-def hl():
-	return render_template( 'list.html' )
-
 @app.route( '/favicon.ico' )
 def favicon():
 	return redirect( url_for( 'static', filename = 'favicon.ico' ) )
 
 @app.route( '/<ident>' )
 def list( ident ):
-	args = request.args
-	if '@' in ident: email = ident
-	else: 
-		try:
-			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
-			email = alias[ 'email' ]
-		except TypeError:
-			abort( 404 )
-		except OperationFailure:
-			abort( 500 )
-	query = { 'email': email }
-	if 'tags' in args: 
-		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
-		query[ 'tags' ] = { '$all': tags }
-	if 'title' in args: 
-		query[ 'title' ] = { '$regex': args[ 'title' ], '$options': 'i' }
-	if 'skip' in args:
-		skip = int( args[ 'skip' ] )
-	else:
-		skip = 0
-	if 'limit' in args:
-		limit = int( args[ 'limit' ] )
-	else:
-		limit = 0		
 	result = []
 	try:
-		for bm in g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] ):
-			date = bm[ 'date-modified' ]
-			result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+		if 'html' in request.args:
+			for bm in list_query( ident, 10 ):
+				date = bm[ 'date-modified' ]
+				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
+			return render_template( 'list.html', bookmarks = result )
+		else:
+			for bm in list_query( ident ):
+				date = bm[ 'date-modified' ]
+				result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
+			return textify( u'\n'.join( result ) )
 	except OperationFailure:
 		abort( 500 )
-	return textify( u'\n'.join( result ) )
 
 @app.route( '/stats' )
 def stats():
