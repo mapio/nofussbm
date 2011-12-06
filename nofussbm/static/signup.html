@@ -25,10 +25,11 @@
 			keyboard: true,
 			backdrop: true
 		} );
+		$( '#email' ).keypress( function( e ) { if ( e.which == 13 ) return false; } );
 		$( '#getkey' ).click( function () {
 			$.get( '/api/v1/sendkey/' + $( '#email' ).val(), function() {
 				$( '#feedback' ).modal( 'show' );
-			} );
+			} ).error( function() { alert( "Something went wrong, please check you email address and try again." ); } );
 		} );
 	} );</script>
 	<style type="text/css">

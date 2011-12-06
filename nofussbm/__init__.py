@@ -38,7 +38,7 @@ setup_json( json ) # horrible hack to personalize decoding in Flask request.json
 
 # Let's go!
 
-app = Flask(__name__)
+app = Flask( __name__ )
 
 
 # Log to stderr (so heroku logs will pick'em up)
