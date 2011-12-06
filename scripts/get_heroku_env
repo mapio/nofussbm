@@ -1,3 +1,5 @@
 #!/bin/bash
 
+export MONGOLAB_URI SECRET_KEY SENDGRID_PASSWORD SENDGRID_USERNAME
 heroku config --app nofussbm -s | egrep '(MONGOLAB_URI|SECRET_KEY|SENDGRID_PASSWORD|SENDGRID_USERNAME)' > .env
+source .env
