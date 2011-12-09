@@ -18,11 +18,31 @@
 from datetime import datetime
 from json import JSONEncoder, JSONDecoder
 
+from bson.code import Code
 from bson.objectid import ObjectId, InvalidId
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 ALLOWED_KEYS = set(( 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ))
+
+tags_map = Code( """
+function() {
+	for ( index in this.tags ) {
+		emit( { 'email': this.email, 'tag': this.tags[ index ] }, 1 );
+	}
+}
+""" )
+
+tags_reduce = Code( """
+function( previous, current ) {
+	var count = 0;
+	for ( index in current ) {
+		count += current[ index ];
+	}
+	return count;
+}
+""")
+
 
 def setup_json( json ):
 

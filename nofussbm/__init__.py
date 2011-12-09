@@ -32,7 +32,7 @@ from flask import Flask, make_response, request, g, redirect, url_for, json, abo
 from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
 
-from .helpers import setup_json
+from .helpers import setup_json, tags_map, tags_reduce
 setup_json( json ) # horrible hack to personalize decoding in Flask request.json
 
 
@@ -189,6 +189,14 @@ def stats():
 	result = {}
 	try:
 		result[ 'users' ] = g.db.bookmarks.group( { 'email': 1 }, None, { 'count': 0 }, 'function( o, p ){ p.count++; }' )
+		g.db.bookmarks.map_reduce( tags_map, tags_reduce, 'tags' )
+		result[ 'tags' ] = g.db.tags.group( 
+			'function(o){ return { email: o._id.email }; }', 
+			None, 
+			{ 'tags' : [] }, 
+			'function( o, p ) { p.tags.push( [ o._id.tag, o.value ] ) }',
+			'function(o){ o.tags.sort( function( a, b ) { return b[ 1 ] - a[ 1 ]; } ); return { email: o.email, tags: o.tags.slice( 1, 10 ) }; }'
+		)
 	except OperationFailure:
 		abort( 500 )
 	return myjsonify( result )
