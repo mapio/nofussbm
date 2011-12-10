@@ -1,7 +1,8 @@
 #!/bin/bash
 
-URL='http://127.0.0.1:5000/api/v1/'
-URL='https://nofussbm.herokuapp.com/api/v1/'
+if [ -z $URL ]; then
+	URL='https://nofussbm.herokuapp.com/api/v1/'
+fi
 
 METHOD=$1
 

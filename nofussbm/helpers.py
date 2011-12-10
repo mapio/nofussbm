@@ -16,33 +16,15 @@
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
+from email.mime.text import MIMEText
 from json import JSONEncoder, JSONDecoder
+from smtplib import SMTP
 
-from bson.code import Code
 from bson.objectid import ObjectId, InvalidId
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 ALLOWED_KEYS = set(( 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ))
-
-tags_map = Code( """
-function() {
-	for ( index in this.tags ) {
-		emit( { 'email': this.email, 'tag': this.tags[ index ] }, 1 );
-	}
-}
-""" )
-
-tags_reduce = Code( """
-function( previous, current ) {
-	var count = 0;
-	for ( index in current ) {
-		count += current[ index ];
-	}
-	return count;
-}
-""")
-
 
 def setup_json( json ):
 
@@ -85,3 +67,16 @@ def setup_json( json ):
 	
 	json.dumps = _dumps
 	json.loads = _loads
+
+
+# Utility functions
+
+def send_mail( frm, to, subject, body ):
+	msg = MIMEText( body.encode( 'utf8' ), 'plain', 'utf8' )
+	msg[ 'Subject' ] = subject
+	msg[ 'From' ] = frm
+	msg[ 'To' ] = to
+	s = SMTP( 'smtp.sendgrid.net' )
+	s.login( Config.SENDGRID_USERNAME, Config.SENDGRID_PASSWORD )
+	s.sendmail( frm, [ to ], msg.as_string() )
+	s.quit()
