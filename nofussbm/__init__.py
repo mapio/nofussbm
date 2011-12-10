@@ -33,14 +33,12 @@ class Config( object ):
 	SENDGRID_USERNAME = ENV[ 'SENDGRID_USERNAME' ]
 	SENDGRID_PASSWORD = ENV[ 'SENDGRID_PASSWORD' ]
 
+from .api import api
+from .tags import tags
 
-# Let's go!
+# Create the app, register APIs blueprint and setup {before,teardown}_request  
 
 app = Flask( __name__ )
-
-# Register the APIs and setup  {before,teardown}_request  
-
-from .api import api
 app.register_blueprint( api, url_prefix = '/api/v1' )
 
 @app.before_request
@@ -68,8 +66,7 @@ def textify( text, code = 200 ):
 	response.headers[ 'Content-Type' ] = 'text/plain; charset=UTF-8'
 	return response
 
-def list_query( ident, limit = None ):
-	args = request.args
+def ident2email( ident ):
 	if '@' in ident: email = ident
 	else: 
 		try:
@@ -79,6 +76,10 @@ def list_query( ident, limit = None ):
 			abort( 404 )
 		except OperationFailure:
 			abort( 500 )
+	return email
+	
+def list_query( email, limit = None ):
+	args = request.args
 	query = { 'email': email }
 	if 'tags' in args: 
 		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
@@ -107,14 +108,15 @@ def favicon():
 @app.route( '/<ident>' )
 def list( ident ):
 	result = []
+	email = ident2email( ident )
 	try:
 		if 'html' in request.args:
-			for bm in list_query( ident, 10 ):
+			for bm in list_query( email, 10 ):
 				date = bm[ 'date-modified' ]
 				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
-			return render_template( 'list.html', bookmarks = result )
+			return render_template( 'list.html', bookmarks = result, tags = tags( g.db, email )[ : 10 ] )
 		else:
-			for bm in list_query( ident ):
+			for bm in list_query( email ):
 				date = bm[ 'date-modified' ]
 				result.append( u'\t'.join( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], u','.join( bm[ 'tags' ] ) ) ) )
 			return textify( u'\n'.join( result ) )

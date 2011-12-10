@@ -22,7 +22,7 @@ from smtplib import SMTP
 
 from bson.objectid import ObjectId, InvalidId
 
-from . impport Config
+from . import Config
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
