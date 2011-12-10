@@ -151,10 +151,10 @@
             an HTML file (usually named <code>delicious.html</code>) containing a sequence of lines of the form </p>
 			<pre>&lt;DT&gt;&lt;A HREF="[url]" ADD_DATE="[timestamp]" PRIVATE="[0|1]" TAGS="[tags]"&gt;[title]&lt;/A&gt;</pre>
 			<p> Then, import it (preserving all the information <em>except</em> for the <code>PRIVATE</code> field) as simply as </p>
-			<pre>curl -T delicious.html -H "X-Nofussbm-Key: $KEY" http://$HOST/api/v1/import</pre>
+			<pre>curl -T delicious.html -H "X-Nofussbm-Key: $KEY" ${URL}import</pre>
 			<p> If you feel that your email is too long, or you want to post somewhere the list of your bookmarks without reveailng
             your identity, you can setup an <strong>alias</strong> as follows </p>
-			<pre>curl -X POST -H "X-Nofussbm-Key: $KEY" http://$HOST/api/v1/setalias/&lt;YOUR_ALIAS&gt;</pre>
+			<pre>curl -X POST -H "X-Nofussbm-Key: $KEY" ${URL}setalias/&lt;YOUR_ALIAS&gt;</pre>
 			<p> where <code>&lt;YOUR_ALIAS&gt;</code> is any word of your choice (look at the answer to see if, in case of
             duplicates, your request wasnt satisfyed). </p>
 		</div>
