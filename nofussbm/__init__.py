@@ -127,8 +127,10 @@ def list_query( ident, limit = None ):
 		skip = int( args[ 'skip' ] )
 	else:
 		skip = 0
-	if not limit:
-		limit = int( args[ 'limit' ] ) if 'limit' in args else 0
+	if 'limit' in args:
+		limit = int( args[ 'limit' ] )
+	else:
+		if limit is None: limit = 0
 	return g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] )
 
 @app.before_request
