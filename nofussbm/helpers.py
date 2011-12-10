@@ -22,6 +22,8 @@ from smtplib import SMTP
 
 from bson.objectid import ObjectId, InvalidId
 
+from . impport Config
+
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 ALLOWED_KEYS = set(( 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ))

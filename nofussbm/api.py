@@ -29,6 +29,7 @@ from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
 
 from . import Config
+from .helpers import send_mail
 
 api = Blueprint( 'api', __name__ )
 
