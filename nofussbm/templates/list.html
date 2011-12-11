@@ -8,9 +8,11 @@ $(function() {
 });
 </script>
 <style type="text/css">
-body {
-	padding-top: 60px;
-}
+body { padding-top: 60px; }
+.bookmarks .url { font-size: smaller; }
+.bookmarks li { margin-bottom: 10px; }
+.tag { background-color: #BFBFBF; padding: 1px 3px 2px; border-radius: 3px; color: white; text-decoration: none; font-size: 9.75px;}
+.tag a { color: white; }
 </style>
 {% endblock %}
 
@@ -31,11 +33,11 @@ body {
 
 	<div class="sidebar">
 		<h1>Top tags</h1>
-		<ul>
-		{% for tag, count in tags %}
-			<li>{{ tag }} ({{ count|int }})</li>
+		<p>
+		{% for tag, count in tags[ : 100 ] %}
+			<a class="tag" href="?tags={{tag}}">{{ tag }}</a> <small>{{ count|int }}</small>
 		{% endfor %}
-		</ul>
+		</p>
 	</div>
 	
 	<div class="content">
@@ -43,12 +45,15 @@ body {
 			<h1>Bookmarks</h1>
 		</div>
 
-		<table id="bookmarks" class="zebra-striped">
-		<thead><tr><th>Date</th><th>Bookmark</th><th>Tags</th></tr></thead><tbody>
-		{% for bm in bookmarks %}
-		<tr><td>{{ bm[ 0 ] }}</td><td><a href="{{ bm[ 1 ] }}">{{ bm[ 2 ][:40] }}</a></td><td>{{ bm[ 3 ]|join( ' ' ) }}</td></tr>
-		{% endfor %}
-		</tbody></table>
+		<ul class="bookmarks unstyled">
+			{% for bm in bookmarks %}
+			<li>
+			<a href="{{ bm[ 1 ] }}">{{ bm[ 2 ] }}</a> ({{ bm[ 0 ] }})
+			
+			<div>{% for tag in bm[ 3 ] %}<a class="tag" href="?tags={{tag}}">{{ tag }}</a> {% endfor %}</div>
+			</li>
+			{% endfor %}
+		</ul>
 
 	</div>
 

@@ -91,6 +91,7 @@ def list_query( email, limit = None ):
 		limit = int( args[ 'limit' ] )
 	else:
 		if limit is None: limit = 0
+	if skip < 0 or limit < 0: abort( 400 )
 	return g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] )
 
 
@@ -107,13 +108,17 @@ def favicon():
 @app.route( '/<ident>' )
 def list( ident ):
 	result = []
+	html = True if 'html' in request.args else False
+	if ident.startswith( 'h:' ):
+		html = True
+		ident = ident[ 2: ]
 	email = ident2email( ident )
 	try:
-		if 'html' in request.args:
+		if html:
 			for bm in list_query( email, 10 ):
 				date = bm[ 'date-modified' ]
 				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
-			return render_template( 'list.html', bookmarks = result, tags = tags( g.db, email )[ : 10 ] )
+			return render_template( 'list.html', bookmarks = result, tags = tags( g.db, email )  )
 		else:
 			for bm in list_query( email ):
 				date = bm[ 'date-modified' ]
