@@ -5,6 +5,6 @@ syntax: glob
 *.json
 .env
 packed
-dump
+local
 TODO.txt
 .git
