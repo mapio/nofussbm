@@ -3,4 +3,4 @@
 from subprocess import check_output as run
 from nofussbm.db import DB
 
-print run( 'mongodump -u {username} -p {password} -h {host}:{port} -d {database_name}'.format( **DB( 'MONGOLAB_URI' ).URI ), shell = True )
+print run( 'mongodump -u {username} -p {password} -h {host}:{port} -d {database_name} --out local/dump'.format( **DB( 'MONGOLAB_URI' ).URI ), shell = True )

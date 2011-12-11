@@ -29,12 +29,13 @@ class DB( object ):
 			'port': p.port,
 			'username': p.username,
 			'password': p.password,
-			'database_name': p.path[ 1: ],
-			'uri': uri }
+			'database_name': p.path[ 1: ]
+			}
+		self._uri = uri
 		self._conn = None
 	def __collection( self, collection ):
-		if not self._conn: self._conn = Connection( self.URI[ 'uri' ] )
-		return self._conn[ self.URI[ 'db' ] ][ collection ]
+		if not self._conn: self._conn = Connection( self._uri )
+		return self._conn[ self.URI[ 'database_name' ] ][ collection ]
 	def __getattr__( self, collection ):
 		return self.__collection( collection )
 	def __getitem__( self, collection ):
