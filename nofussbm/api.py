@@ -23,8 +23,7 @@ import hmac
 import re
 from urlparse import parse_qs
 
-from flask import Blueprint, make_response, request, g, redirect, url_for, json, abort, render_template
-
+from flask import Blueprint, make_response, request, g, json, abort
 from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
 

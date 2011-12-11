@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+from sys import argv
+from nofussbm.db import DB
+
+db = DB( 'MONGOLAB_URI' )
+
+if len( argv ) > 1 and argv[ 1 ] == '-e':
+	for entry in db[ 'error-logs' ].find():
+		print entry[ 'timestamp' ].as_datetime(), entry[ 'message' ]
+else:
+	for entry in db[ 'access-logs' ].find():
+		print entry[ 'message' ]

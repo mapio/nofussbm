@@ -16,25 +16,23 @@
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
 from logging import StreamHandler, Formatter, getLogger, DEBUG
-from os import environ as ENV
-from urlparse import parse_qs
+from os import environ
 
 from flask import Flask, make_response, request, g, redirect, url_for, abort, render_template
 
-from pymongo import Connection
-from pymongo.errors import OperationFailure, DuplicateKeyError
+from pymongo.errors import OperationFailure
 
 
 # Configure from the environment, global (immutable) variables (before submodules import)
 
 class Config( object ):
-	SECRET_KEY = ENV[ 'SECRET_KEY' ]
-	MONGOLAB_URI = ENV[ 'MONGOLAB_URI' ]
-	SENDGRID_USERNAME = ENV[ 'SENDGRID_USERNAME' ]
-	SENDGRID_PASSWORD = ENV[ 'SENDGRID_PASSWORD' ]
+	SECRET_KEY = environ[ 'SECRET_KEY' ]
+	SENDGRID_USERNAME = environ[ 'SENDGRID_USERNAME' ]
+	SENDGRID_PASSWORD = environ[ 'SENDGRID_PASSWORD' ]
 
 from .api import api
 from .tags import tags
+from .db import DB
 
 # Create the app, register APIs blueprint and setup {before,teardown}_request  
 
@@ -43,12 +41,11 @@ app.register_blueprint( api, url_prefix = '/api/v1' )
 
 @app.before_request
 def before_request():
-	g.conn = Connection( Config.MONGOLAB_URI )
-	g.db = g.conn[ Config.MONGOLAB_URI.split('/')[ -1 ] ]
-	
+	g.db = DB( 'MONGOLAB_URI' )
+
 @app.teardown_request
 def teardown_request( exception ):
-	g.conn.disconnect()
+	del g.db
 
 # Log to stderr (so heroku logs will pick'em up)
 

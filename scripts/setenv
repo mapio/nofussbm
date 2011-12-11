@@ -1,0 +1,2 @@
+eval $(sed 's/\(.*\)=\(.*\)/export \1="\2"/' < ./.env)
+export PYTHONPATH=.
