@@ -10,7 +10,13 @@
 		$( "#html" ).prop( "checked", false );
 		$( "#text" ).prop( "checked", true );
 	}
-	$( "#bookmarks_per_page" ).val( $.cookie( "bookmarks_per_page" ) );
+	$( "#bookmarks_per_page" ).val( $.cookie( "bookmarks_per_page" ) == null ? 10 : $.cookie( "bookmarks_per_page" ) );
+	$( '#bookmarks_per_page' ).keypress( function( e ) {
+		if ( e.which == 13 ) {
+			e.peventDefault()
+			$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val() );
+		}
+	} );
 	$( "#show_tags" ).prop( "checked", $.cookie( "show_tags" ) == 'true' );
 	$( "#html" ).change( function() {
 		$.cookie( "list_appearance", "html" );
@@ -60,13 +66,13 @@
 		</div><!-- /clearfix -->
 
 		<div class="clearfix">
-			<label>Tags</label>
+			<label>Top tags</label>
 			<div class="input"><ul class="inputs-list">
 				<li><label>
 					<input type="checkbox" name="show_tags" id="show_tags" />
-					Show tags 
+					Show
 				</label>
-				<span class="help-block">Computing the tag list (and frequencies) can slow down page access</span>
+				<span class="help-block">Computing the top tags list (and frequencies) can slow down page access</span>
 				</li>
 			</ul></div>
 		</div><!-- /clearfix -->
