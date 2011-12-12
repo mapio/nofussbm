@@ -1,6 +1,6 @@
 2011-12-12  Massimo Santini  <santini@dsi.unimi.it>
 
-	* server: added options management and filter on html listing (with navigation)
+	* server: added options management and filter on html listing (with ajax navigation)
 
 2011-12-11  Massimo Santini  <santini@dsi.unimi.it>
 
