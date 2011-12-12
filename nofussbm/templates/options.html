@@ -19,16 +19,16 @@
 	} );
 	$( "#show_tags" ).prop( "checked", $.cookie( "show_tags" ) == 'true' );
 	$( "#html" ).change( function() {
-		$.cookie( "list_appearance", "html" );
+		$.cookie( "list_appearance", "html", { expires: 365 } );
 	} );
 	$( "#text" ).change( function() {
-		$.cookie( "list_appearance", "text" );
+		$.cookie( "list_appearance", "text", { expires: 365 } );
 	} );
 	$( "#bookmarks_per_page" ).change( function() {
-		$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val() );
+		$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val(), { expires: 365 } );
 	} );
 	$( "#show_tags" ).change( function() {
-		$.cookie( "show_tags", $( "#show_tags" ).prop( "checked" ) ? 'true' : 'false' );
+		$.cookie( "show_tags", $( "#show_tags" ).prop( "checked" ) ? 'true' : 'false', { expires: 365 } );
 	} );
 } );</script>
 {% endblock %}
