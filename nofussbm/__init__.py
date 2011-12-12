@@ -112,18 +112,12 @@ def options():
 @app.route( '/<ident>' )
 def list( ident ):
 	
-	try:
-		list_appearance = request.cookies.get( 'list_appearance' )
-	except KeyError:
-		list_appearance = 'text'
-	try:
-		bookmarks_per_page = int( request.cookies.get( 'bookmarks_per_page' ) )
-	except ( KeyError, TypeError ):
-		bookmarks_per_page = 10
-	try:	
-		show_tags = request.cookies.get( 'show_tags' ) == 'true'
-	except KeyError:
-		show_tags = True
+	list_appearance = 'html' if request.headers[ 'User-Agent'].split( '/' )[ 0 ] in ( 'Microsoft Internet Explorer', 'Mozilla', 'Opera' ) else 'text'
+	la_c = request.cookies.get( 'list_appearance' )
+	if la_c: list_appearance = la_c
+	bpp_c = request.cookies.get( 'bookmarks_per_page' )
+	bookmarks_per_page = int( bpp_c ) if bpp_c else 10
+	show_tags = request.cookies.get( 'show_tags' ) == 'true'
 	content_only = 'content_only' in request.args
 		
 	result = []
