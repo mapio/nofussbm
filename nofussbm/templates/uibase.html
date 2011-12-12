@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style type="text/css">
+body { padding-top: 60px; }
+.bookmarks .url { font-size: smaller; }
+.bookmarks li { margin-bottom: 10px; }
+.tag { background-color: #BFBFBF; padding: 1px 3px 2px; border-radius: 3px; color: white; text-decoration: none; font-size: 9.75px;}
+.tag a { color: white; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="topbar">
+	<div class="fill">
+		<div class="container-fluid">
+			<a class="brand" href="/">No Fuss Bookmarks</a>
+			<ul class="nav">
+				<li><a href="https://github.com/mapio/nofussbm">GitHub</a></li>
+				<li><a href="https://chrome.google.com/webstore/detail/cgahojkildjmnkcjpfbojdbnpbphdieo">Chrome Web Store</a></li>
+			</ul>
+			<p class="pull-right"><a href="/options.html">[options]</a></p>
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid">
+
+	<div class="sidebar">
+	{% block sidebar %}{% endblock %}
+	</div>
+	
+	<div class="content">
+	{% block content %}{% endblock %}
+	</div>
+
+	<footer>
+		<p>&copy; <a href="http://santini.dsi.unimi.it">Massimo Santini</a> 2011</p>
+	</footer>
+
+</div>
+{% endblock %}

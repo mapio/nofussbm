@@ -1,0 +1,76 @@
+{% extends "uibase.html" %}
+
+{% block head %}
+<script type="text/javascript" src="/static/jquery.cookie.js"></script>
+<script type="text/javascript">$( document ).ready( function() {
+	if ( $.cookie( "list_appearance" ) == "html" ) {
+		$( "#html" ).prop( "checked", true );
+		$( "#text" ).prop( "checked", false );
+	} else {
+		$( "#html" ).prop( "checked", false );
+		$( "#text" ).prop( "checked", true );
+	}
+	$( "#bookmarks_per_page" ).val( $.cookie( "bookmarks_per_page" ) );
+	$( "#show_tags" ).prop( "checked", $.cookie( "show_tags" ) == 'true' );
+	$( "#html" ).change( function() {
+		$.cookie( "list_appearance", "html" );
+	} );
+	$( "#text" ).change( function() {
+		$.cookie( "list_appearance", "text" );
+	} );
+	$( "#bookmarks_per_page" ).change( function() {
+		$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val() );
+	} );
+	$( "#show_tags" ).change( function() {
+		$.cookie( "show_tags", $( "#show_tags" ).prop( "checked" ) ? 'true' : 'false' );
+	} );
+} );</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>Options</h1>
+</div>
+
+<form action="#" method="POST">
+	<fieldset>
+
+		<legend>List page</legend>
+
+		<div class="clearfix">
+			<label>List appearance</label>
+			<div class="input"><ul class="inputs-list">
+					<li><label>
+						<span>Text</span>
+						<input type="radio" name="list_appearance" id="text" value="text" />
+					</label></li>
+					<li><label>
+						<span>HTML</span>
+						<input type="radio" name="list_appearance" id="html" value="html" />
+					</label></li>
+			</ul></div>
+		</div><!-- /clearfix -->
+
+		<div class="clearfix">
+			<label>Bookmarks per page</label>
+			<div class="input">
+				<input class="small" type="text" id='bookmarks_per_page' />
+				<span class="help-block">Set to 0 to show all your bookmarks in a single page</span>
+			</div>
+		</div><!-- /clearfix -->
+
+		<div class="clearfix">
+			<label>Tags</label>
+			<div class="input"><ul class="inputs-list">
+				<li><label>
+					<input type="checkbox" name="show_tags" id="show_tags" />
+					Show tags 
+				</label>
+				<span class="help-block">Computing the tag list (and frequencies) can slow down page access</span>
+				</li>
+			</ul></div>
+		</div><!-- /clearfix -->
+		
+	</fieldset>
+</form>
+{% endblock %}	

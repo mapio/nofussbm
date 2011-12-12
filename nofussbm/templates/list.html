@@ -1,12 +1,6 @@
-{% extends "base.html" %}
+{% extends "uibase.html" %}
 
 {% block head %}
-<script src="/static/jquery.tablesorter.min.js"></script>
-<script>
-$(function() {
-	$( "#bookmarks" ).tablesorter();
-});
-</script>
 <style type="text/css">
 body { padding-top: 60px; }
 .bookmarks .url { font-size: smaller; }
@@ -16,31 +10,16 @@ body { padding-top: 60px; }
 </style>
 {% endblock %}
 
-{% block body %}
-<div class="topbar">
-	<div class="fill">
-		<div class="container-fluid">
-			<a class="brand" href="/">No Fuss Bookmarks</a>
-			<ul class="nav">
-				<li><a href="https://github.com/mapio/nofussbm">GitHub</a></li>
-				<li><a href="https://chrome.google.com/webstore/detail/cgahojkildjmnkcjpfbojdbnpbphdieo">Chrome Web Store</a></li>
-			</ul>
-		</div>
-	</div>
-</div>
-
-<div class="container-fluid">
-
-	<div class="sidebar">
+{% block sidebar %}
 		<h1>Top tags</h1>
 		<p>
 		{% for tag, count in tags[ : 100 ] %}
 			<a class="tag" href="?tags={{tag}}">{{ tag }}</a> <small>{{ count|int }}</small>
 		{% endfor %}
 		</p>
-	</div>
-	
-	<div class="content">
+{% endblock %}	
+
+{% block content %}
 		<div class="page-header">
 			<h1>Bookmarks</h1>
 		</div>
@@ -54,12 +33,4 @@ body { padding-top: 60px; }
 			</li>
 			{% endfor %}
 		</ul>
-
-	</div>
-
-	<footer>
-		<p>&copy; Massimo Santini 2011</p>
-	</footer>
-
-</div>
-{% endblock %}
+{% endblock %}	
