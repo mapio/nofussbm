@@ -13,6 +13,8 @@ case $METHOD in
 	else
 		curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" ${URL}$ARG
 	fi ;;
+	QUERY|query)
+	curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" -H "X-Nofussbm-Query: $ARG" $URL ;;
 	DELETE|delete|del)
 	curl $SHOW_HEADERS -d @- -X DELETE -H "Content-type: application/json" -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
 	POST|post)

@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+from json import load, dumps
+from sys import argv
+
+with ( open( argv[ 1 ], 'r' ) ) as f:
+	a = load( f )
+
+with ( open( argv[ 2 ], 'r' ) ) as f:
+	b = load( f )
+
+d = [] 
+for x, y in zip( a, b ):
+	if x != y: d.append( x )
+	
+print dumps( d, indent = 4, sort_keys = True, ensure_ascii = False  )
