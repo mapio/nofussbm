@@ -20,7 +20,6 @@ body { padding-top: 60px; }
 	}
 
 	function fixnav() {
-		console.log( "FIXNAV" + $("#content li").length );
 		$( "#first" ).prop( 'disabled', qs[ "skip" ] == 0 );
 		$( "#prev" ).prop( 'disabled', qs[ "skip" ] == 0 );
 		$( "#next" ).prop( 'disabled', $("#content li").length < bookmarks_per_page );
