@@ -132,9 +132,9 @@ def get( bid = None ):
 			limit = int( m[ 2 ] ) - skip + 1 if m[ 2 ] else 0 
 		if not m or limit < 0: abort( 416 )
 
-	args = parse_qs( request.headers[ 'X-Nofussbm-query' ] ) if 'X-Nofussbm-query' in request.headers else None
-	query = query_from_dict( g.email, args )
-
+	args = parse_qs( request.headers[ 'X-Nofussbm-Query' ] ) if 'X-Nofussbm-Query' in request.headers else None
+	query = query_from_dict( g.email, dict( ( k, args[ k ][ 0 ] ) for k in args.keys() ) )
+	
 	try:
 		cur = g.db.bookmarks.find( query, skip = skip, limit = limit )
 		n = cur.count()
