@@ -1,3 +1,16 @@
+2011-12-12  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: added options management and filter on html listing (with navigation)
+
+2011-12-11  Massimo Santini  <santini@dsi.unimi.it>
+
+	* scripts: refactored the way we connect to the db, or manipulate the URI
+
+2011-12-10  Massimo Santini  <santini@dsi.unimi.it>
+
+	* server: Moved APIs to a (Flask) blueprint
+	* server: Added some support for tags statistics (map reduce mongo stuff)
+
 2011-12-06  Massimo Santini  <santini@dsi.unimi.it>
 
 	* server: Added (very initial) support for html listing, just add ?html= to the / URL
