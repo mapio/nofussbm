@@ -3,12 +3,12 @@
 {% block head %}
 <script type="text/javascript" src="/static/jquery.cookie.js"></script>
 <script type="text/javascript">$( document ).ready( function() {
-	if ( $.cookie( "list_appearance" ) == "html" ) {
-		$( "#html" ).prop( "checked", true );
-		$( "#text" ).prop( "checked", false );
-	} else {
+	if ( $.cookie( "list_appearance" ) == "text" ) {
 		$( "#html" ).prop( "checked", false );
 		$( "#text" ).prop( "checked", true );
+	} else {
+		$( "#html" ).prop( "checked", true );
+		$( "#text" ).prop( "checked", false );
 	}
 	$( "#bookmarks_per_page" ).val( $.cookie( "bookmarks_per_page" ) == null ? 10 : $.cookie( "bookmarks_per_page" ) );
 	$( '#bookmarks_per_page' ).keypress( function( e ) {
@@ -17,7 +17,7 @@
 			$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val() );
 		}
 	} );
-	$( "#show_tags" ).prop( "checked", $.cookie( "show_tags" ) == 'true' );
+	$( "#show_tags" ).prop( "checked", $.cookie( "show_tags" ) != 'false' );
 	$( "#html" ).change( function() {
 		$.cookie( "list_appearance", "html", { expires: 365 } );
 	} );

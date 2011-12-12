@@ -117,7 +117,7 @@ def list( ident ):
 	if la_c: list_appearance = la_c
 	bpp_c = request.cookies.get( 'bookmarks_per_page' )
 	bookmarks_per_page = int( bpp_c ) if bpp_c else 10
-	show_tags = request.cookies.get( 'show_tags' ) == 'true'
+	show_tags = request.cookies.get( 'show_tags' ) != 'false'
 	content_only = 'content_only' in request.args
 		
 	result = []
