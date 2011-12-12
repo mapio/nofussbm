@@ -5,10 +5,14 @@ if [ -z $URL ]; then
 fi
 
 METHOD=$1
-
+ARG=$2
 case $METHOD in
 	GET|get)
-	curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
+	if [ -z $ARG ]; then
+		curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL
+	else
+		curl $SHOW_HEADERS -H "X-Nofussbm-Key: $NOFUSSBM_KEY" ${URL}$ARG
+	fi ;;
 	DELETE|delete|del)
 	curl $SHOW_HEADERS -d @- -X DELETE -H "Content-type: application/json" -H "X-Nofussbm-Key: $NOFUSSBM_KEY" $URL ;;
 	POST|post)
