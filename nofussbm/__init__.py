@@ -99,26 +99,44 @@ def list_query( email, limit = None ):
 
 @app.route( '/' )
 def index():
-	return render_template( 'signup.html' )
+	return redirect( url_for( 'signup' ) )
 
 @app.route( '/favicon.ico' )
 def favicon():
 	return redirect( url_for( 'static', filename = 'favicon.ico' ) )
 
+@app.route( '/signup.html' )
+def signup():
+	return render_template( 'signup.html' )
+
+@app.route( '/options.html' )
+def options():
+	return render_template( 'options.html' )
+
 @app.route( '/<ident>' )
 def list( ident ):
+	
+	try:
+		list_appearance = request.cookies.get( 'list_appearance' )
+	except KeyError:
+		list_appearance = 'text'
+	try:
+		bookmarks_per_page = int( request.cookies.get( 'bookmarks_per_page' ) )
+	except ( KeyError, TypeError ):
+		bookmarks_per_page = 10
+	try:	
+		show_tags = request.cookies.get( 'show_tags' ) == 'true'
+	except KeyError:
+		show_tags = True
+		
 	result = []
-	html = True if 'html' in request.args else False
-	if ident.startswith( 'h:' ):
-		html = True
-		ident = ident[ 2: ]
 	email = ident2email( ident )
 	try:
-		if html:
-			for bm in list_query( email, 10 ):
+		if list_appearance == 'html':
+			for bm in list_query( email, bookmarks_per_page ):
 				date = bm[ 'date-modified' ]
 				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
-			return render_template( 'list.html', bookmarks = result, tags = tags( g.db, email )  )
+			return render_template( 'list.html', bookmarks = result, top_tags = tags( g.db, email ) if show_tags else None )
 		else:
 			for bm in list_query( email ):
 				date = bm[ 'date-modified' ]

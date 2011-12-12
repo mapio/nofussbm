@@ -3,7 +3,7 @@ syntax: glob
 *.log
 *.pem
 *.json
-.env
+.env*
 packed
 local
 TODO.txt
