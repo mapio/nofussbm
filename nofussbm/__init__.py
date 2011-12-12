@@ -128,6 +128,7 @@ def list( ident ):
 		show_tags = request.cookies.get( 'show_tags' ) == 'true'
 	except KeyError:
 		show_tags = True
+	content_only = 'content_only' in request.args
 		
 	result = []
 	email = ident2email( ident )
@@ -136,7 +137,10 @@ def list( ident ):
 			for bm in list_query( email, bookmarks_per_page ):
 				date = bm[ 'date-modified' ]
 				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
-			return render_template( 'list.html', bookmarks = result, top_tags = tags( g.db, email ) if show_tags else None )
+			if content_only:
+				return render_template( 'list-content.html', bookmarks = result )
+			else:
+				return render_template( 'list.html', bookmarks = result, top_tags = tags( g.db, email ) if show_tags else None )
 		else:
 			for bm in list_query( email ):
 				date = bm[ 'date-modified' ]

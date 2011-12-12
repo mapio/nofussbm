@@ -3,56 +3,64 @@
 {% block head %}
 <style type="text/css">
 body { padding-top: 60px; }
-.bookmarks .url { font-size: smaller; }
 .bookmarks li { margin-bottom: 10px; }
-.tag { background-color: #BFBFBF; padding: 1px 3px 2px; border-radius: 3px; color: white; text-decoration: none; font-size: 9.75px;}
-.tag a { color: white; }
+.tag {  cursor: pointer; background-color: #BFBFBF; padding: 1px 3px 2px; border-radius: 3px; color: white; text-decoration: none; font-size: 9.75px;}
 </style>
 <script type="text/javascript" src="/static/jquery.ba-bbq.min.js"></script>
 <script type="text/javascript" src="/static/jquery.cookie.js"></script>
-<script type="text/javascript">$( document ).ready( function() {
+<script type="text/javascript">
 
 	var qs = $.deparam.querystring();
-	if ( qs[ "skip"] == undefined ) { 
-		qs[ "skip" ] = 0;
-		$( "#prev" ).prop( 'disabled', true );
-		$( "#first" ).prop( 'disabled', true );
-	} else {
-		qs[ "skip" ] = parseInt( qs[ "skip" ] );
+	qs[ "skip" ] = qs[ "skip" ] ? parseInt( qs[ "skip" ] ) : 0;
+	var bookmarks_per_page = $.cookie( "bookmarks_per_page" ) ? parseInt( $.cookie( "bookmarks_per_page" ) ) : 10;
+
+	function tagsbm( tag ) {
+		$( "#tags" ).val( $( tag ).text() );
+		return sbm( 0, "tags" );
 	}
-	var bookmarks_per_page = $.cookie( "bookmarks_per_page" );
-	if ( bookmarks_per_page == null )
-		bookmarks_per_page = 10;
-	else
-		bookmarks_per_page = parseInt( bookmarks_per_page );
-	
+
+	function fixnav() {
+		console.log( "FIXNAV" + $("#content li").length );
+		$( "#first" ).prop( 'disabled', qs[ "skip" ] == 0 );
+		$( "#prev" ).prop( 'disabled', qs[ "skip" ] == 0 );
+		$( "#next" ).prop( 'disabled', $("#content li").length < bookmarks_per_page );
+	}
+
 	function sbm( skip, field ) {
 		if ( field != undefined ) {
 			var value = $( "#" + field ).val();
 				qs[ field ] = value == "" ? undefined : value;
 		}
-		if ( skip == 0 ) qs[ "skip" ] = undefined;
+		if ( skip == 0 ) qs[ "skip" ] = 0;
 		else if ( skip == 1 ) qs[ "skip" ] += bookmarks_per_page;
 		else qs[ "skip" ] -= bookmarks_per_page;
-		var url = $.param.querystring( "", qs );
-		window.location.replace( url );
+		qs[ "content_only" ] = "true";
+		$.get( $.param.querystring( "", qs ), function( data ) {
+			$( "#content" ).html( data );
+			fixnav();
+		} );
+		return false;
 	}
-	
-	$( "#tags" ).val( qs[ "tags" ] );
-	$( "#tags" ).change( function() { sbm( 0, "tags" ); } );
-	$( '#tags' ).keypress( function( e ) { if ( e.which == 13 ) { e.preventDefault(); sbm( 0, "tags" ); } } );
-	$( "#clear_tags" ).click( function() { $( "#tags" ).val( "" ); sbm( 0, "tags" ); } );
 
-	$( "#title" ).val( qs[ "title" ] );
-	$( "#title" ).change( function() { sbm( 0, "title" ); } );
-	$( '#title' ).keypress( function( e ) { if ( e.which == 13 ) { e.preventDefault(); sbm( 0, "title" ); } } );
-	$( "#clear_title" ).click( function() { $( "#title" ).val( "" ); sbm( 0, "title" ); } );
+	$( document ).ready( function() {
 
-	$( "#first" ).click( function() { sbm( 0 ); return false; } );
-	$( "#prev" ).click( function() { sbm( -1 ); return false; } );
-	$( "#next" ).click( function() { sbm( +1 ); return false; } );
+		$( "#tags" ).val( qs[ "tags" ] );
+		$( "#tags" ).change( function() { sbm( 0, "tags" ); } );
+		$( '#tags' ).keypress( function( e ) { if ( e.which == 13 ) { return sbm( 0, "tags" ); } } );
+		$( "#clear_tags" ).click( function() { $( "#tags" ).val( "" ); return sbm( 0, "tags" ); } );
 
-} );</script>
+		$( "#title" ).val( qs[ "title" ] );
+		$( "#title" ).change( function() { sbm( 0, "title" ); } );
+		$( '#title' ).keypress( function( e ) { if ( e.which == 13 ) { return sbm( 0, "title" ); } } );
+		$( "#clear_title" ).click( function() { $( "#title" ).val( "" ); return sbm( 0, "title" ); } );
+
+		fixnav();
+		$( "#first" ).click( function() { return sbm( 0 ); } );
+		$( "#prev" ).click( function() { return sbm( -1 ); } );
+		$( "#next" ).click( function() { return sbm( +1 ); } );
+
+	} );
+</script>
 {% endblock %}
 
 {% block sidebar %}
@@ -85,7 +93,7 @@ body { padding-top: 60px; }
 	<h1>Top tags</h1>
 	<p>
 	{% for tag, count in top_tags[ : 100 ] %}
-		<a class="tag" href="?tags={{tag}}">{{ tag }}</a> <small>{{ count|int }}</small>
+		<span class="tag" onclick="tagsbm( this )">{{ tag }}</span> <small>{{ count|int }}</small>
 	{% endfor %}
 	</p>
 	{% endif %}
@@ -95,14 +103,7 @@ body { padding-top: 60px; }
 		<div class="page-header">
 			<h1>Bookmarks</h1>
 		</div>
-
 		<ul class="bookmarks unstyled">
-			{% for bm in bookmarks %}
-			<li>
-			<a href="{{ bm[ 1 ] }}">{{ bm[ 2 ] }}</a> ({{ bm[ 0 ] }})
-			
-			<div>{% for tag in bm[ 3 ] %}<a class="tag" href="?tags={{tag}}">{{ tag }}</a> {% endfor %}</div>
-			</li>
-			{% endfor %}
+		<div id="content">{% include "list-content.html" %}</div>
 		</ul>
 {% endblock %}	
