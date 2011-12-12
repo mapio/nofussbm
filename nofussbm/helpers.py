@@ -28,19 +28,32 @@ DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 ALLOWED_KEYS = set(( 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ))
 
+def to_id( id_as_str ):
+	res = None
+	try:
+		res = ObjectId( id_as_str )
+	except InvalidId:
+		pass
+	return res
+
+def query_from_dict( email, dct ):
+	query = { 'email': email }
+	if not dct: return query
+	if 'tags' in dct: 
+		tags = map( lambda _: _.strip(), dct[ 'tags' ].split( ',' ) )
+		query[ 'tags' ] = { '$all': tags }
+	if 'title' in dct: 
+		query[ 'title' ] = { '$regex': dct[ 'title' ], '$options': 'i' }
+	return query
+
 def setup_json( json ):
 
 	def object_hook( dct ):
 		res = {}
 		for key, value in dct.items(): 
 			if key not in ALLOWED_KEYS: continue
-			if key == 'id':
-				try:
-					res[ 'id' ] = ObjectId( value )
-				except InvalidId:
-					pass
-			elif key == 'tags':
-				res[ 'tags' ] = map( lambda _: _.strip(), value.split( ',' ) )
+			if key == 'id': res[ 'id' ] = to_id( value )
+			elif key == 'tags': res[ 'tags' ] = map( lambda _: _.strip(), value.split( ',' ) )
 			elif key.startswith( 'date-' ):
 				try:
 					res[ key ] = datetime.strptime( value, DATETIME_FORMAT )

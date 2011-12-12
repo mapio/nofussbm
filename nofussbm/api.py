@@ -28,7 +28,8 @@ from pymongo import Connection
 from pymongo.errors import OperationFailure, DuplicateKeyError
 
 from . import Config
-from .helpers import send_mail
+from .helpers import send_mail, to_id, query_from_dict
+
 
 api = Blueprint( 'api', __name__ )
 
@@ -110,9 +111,17 @@ def post():
 	return myjsonify( result, code )
 
 @api.route( '/', methods = [ 'GET' ] )
+@api.route( '/<bid>', methods = [ 'GET' ] )
 @key_required
-def get():
+def get( bid = None ):
 	result = []
+
+	if bid:
+		try:
+			result.append( g.db.bookmarks.find_one( { '_id': to_id( bid ) , 'email': g.email } ) )
+		except OperationFailure:
+			abort( 500 )
+		return myjsonify( result )
 
 	skip = limit = 0
 	if 'Range' in request.headers:
@@ -123,14 +132,8 @@ def get():
 			limit = int( m[ 2 ] ) - skip + 1 if m[ 2 ] else 0 
 		if not m or limit < 0: abort( 416 )
 
-	query = { 'email': g.email }
-	if 'X-Nofussbm-query' in request.headers:
-		args = parse_qs( request.headers[ 'X-Nofussbm-query' ] )
-		if 'tags' in args: 
-			tags = map( lambda _: _.strip(), args[ 'tags' ][ 0 ].split( ',' ) )
-			query[ 'tags' ] = { '$all': tags }
-		if 'title' in args: 
-			query[ 'title' ] = { '$regex': args[ 'title' ][ 0 ], '$options': 'i' }
+	args = parse_qs( request.headers[ 'X-Nofussbm-query' ] ) if 'X-Nofussbm-query' in request.headers else None
+	query = query_from_dict( email, args )
 
 	try:
 		cur = g.db.bookmarks.find( query, skip = skip, limit = limit )

@@ -31,8 +31,9 @@ class Config( object ):
 	SENDGRID_PASSWORD = environ[ 'SENDGRID_PASSWORD' ]
 
 from .api import api
-from .tags import tags
 from .db import DB
+from .helpers import query_from_dict
+from .tags import tags
 
 # Create the app, register APIs blueprint and setup {before,teardown}_request  
 
@@ -77,12 +78,7 @@ def ident2email( ident ):
 	
 def list_query( email, limit = None ):
 	args = request.args
-	query = { 'email': email }
-	if 'tags' in args: 
-		tags = map( lambda _: _.strip(), args[ 'tags' ].split( ',' ) )
-		query[ 'tags' ] = { '$all': tags }
-	if 'title' in args: 
-		query[ 'title' ] = { '$regex': args[ 'title' ], '$options': 'i' }
+	query = query_from_dict( email, args )
 	if 'skip' in args:
 		skip = int( args[ 'skip' ] )
 	else:
