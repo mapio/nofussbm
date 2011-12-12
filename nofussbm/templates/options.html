@@ -13,7 +13,7 @@
 	$( "#bookmarks_per_page" ).val( $.cookie( "bookmarks_per_page" ) == null ? 10 : $.cookie( "bookmarks_per_page" ) );
 	$( '#bookmarks_per_page' ).keypress( function( e ) {
 		if ( e.which == 13 ) {
-			e.peventDefault()
+			e.preventDefault();
 			$.cookie( "bookmarks_per_page", $( "#bookmarks_per_page" ).val() );
 		}
 	} );
