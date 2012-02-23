@@ -101,6 +101,10 @@ def index():
 def favicon():
 	return redirect( url_for( 'static', filename = 'favicon.ico' ) )
 
+@app.route( '/robots.txt' )
+def robots():
+	return redirect( url_for( 'static', filename = 'robots.txt' ) )
+
 @app.route( '/signup.html' )
 def signup():
 	return render_template( 'signup.html' )
