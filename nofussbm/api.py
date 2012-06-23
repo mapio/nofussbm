@@ -133,7 +133,7 @@ def get( bid = None ):
 		if not m or limit < 0: abort( 416 )
 
 	args = parse_qs( request.headers[ 'X-Nofussbm-Query' ] ) if 'X-Nofussbm-Query' in request.headers else None
-	query = query_from_dict( g.email, dict( ( k, args[ k ][ 0 ] ) for k in args.keys() ) )
+	query = query_from_dict( g.email, dict( ( k, args[ k ][ 0 ] ) for k in args.keys() ) if args else None )
 	
 	try:
 		cur = g.db.bookmarks.find( query, skip = skip, limit = limit )
