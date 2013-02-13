@@ -15,4 +15,4 @@ The service is just an incarnation of such software hosted by
 can freely use just submitting your email below to obtain your API key.
 
 For more details, please visit the [service signup
-page](http://nofussbm.herokuapp.com/static/signup.html).
+page](http://nofussbm.herokuapp.com/signup.html).
