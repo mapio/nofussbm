@@ -3,68 +3,32 @@
 <head>
 	<meta charset="utf-8" />
 	<title>nofussbm popup</title>
-	<script type="text/javascript">
-		var form, key;
-		function onload() {
-			form = document.forms.bookmarks;
-			key = localStorage.getItem( "key" );
-			if ( ! key ) {
-				alert( "Please set your API key in extension's options" );
-			} 
-			chrome.tabs.getSelected( null, function( tab ) {
-				chrome.tabs.sendRequest( tab.id, {}, function handler( response ) {
-					form.url.value = tab.url;
-					form.title.value = response.title;
-				} );
-			} );
-		}
-		function postUrl() {
-			var data = JSON.stringify( [ { "url": form.url.value, "title": form.title.value, "tags": form.tags.value } ] );
-			var req = new XMLHttpRequest();
-			req.onreadystatechange = function() {
-				if( this.readyState == 4 && this.status == 200 ) {
-					response = JSON.parse( req.responseText )
-					if ( response[ "added" ].length ) {
-						form.status.value = "Added Bookmark, id = " + response[ "added" ][ 0 ];
-					} else {
-						form.status.value = 'The bookmark was not added';
-					}
-				} else if ( this.readyState == 4 && this.status != 200 ) {
-					form.status.value = 'An error has occurred';
-				}
-			}
-			req.open( "POST", "http://nofussbm.herokuapp.com/api/v1/", true );
-			req.setRequestHeader( "Content-Type", "application/json" );
-			req.setRequestHeader( "X-Nofussbm-Key", key );
-			req.send( data );
-			console.log( data );
-		}
-	</script>
+	<script type="text/javascript" src="popup.js"></script>
 </head>
-<body onload="onload()">
+<body>
 	<form action="#" method="post" name="bookmarks">
 		<input type="url" name="url" id="url" size="80" placeholder="URL"  autocapitalize="off">
 		<input type="text" name="title" id="title" size="80" placeholder="Title">
 		<input type="text" name="tags" id="tags" size="80" placeholder="Tags" autofocus>
-		<input type="button" value="Post it!" onclick="postUrl()"> Result: <input type="text" name="status" id="status" size="50" readonly>
+		<input type="button" id="postit" value="Post it!"> Result: <input type="text" name="status" id="status" size="50" readonly>
 	</form>
 </body>
 </html>
 <!--
  Copyright 2011, Massimo Santini <santini@dsi.unimi.it>
- 
+
  This file is part of "No Fuss Bookmarks".
- 
+
  "No Fuss Bookmarks" is free software: you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
  Software Foundation, either version 3 of the License, or (at your option) any
  later version.
- 
+
  "No Fuss Bookmarks" is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  details.
- 
+
  You should have received a copy of the GNU General Public License along with
  "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 -->

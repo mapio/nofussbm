@@ -1,17 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<title>nofussbm options</title>
-	<script type="text/javascript" src="options.js"></script>
-</head>
-<body>
-	<form action="#" method="post" name="options">
-		Enter API Key: <input type="text" name="key" id="key" size="128"><br />
-	</form>
-</body>
-</html>
-<!--
+/*
  Copyright 2011, Massimo Santini <santini@dsi.unimi.it>
 
  This file is part of "No Fuss Bookmarks".
@@ -28,4 +15,20 @@
 
  You should have received a copy of the GNU General Public License along with
  "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
--->
+*/
+
+var form;
+
+function onload() {
+	form = document.forms.options;
+	form.key.value = localStorage.getItem( 'key' );
+}
+
+function set() {
+	localStorage.setItem( 'key', form.key.value );
+}
+
+document.addEventListener( 'DOMContentLoaded', function () {
+    onload();
+    document.getElementById( 'key' ).addEventListener( 'change', set );
+} );
