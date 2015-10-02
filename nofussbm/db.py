@@ -18,6 +18,7 @@
 from os import environ
 from urlparse import urlparse
 
+
 from pymongo import MongoClient
 
 class DB( object ):
