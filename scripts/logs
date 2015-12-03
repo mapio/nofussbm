@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from sys import argv
-from nofussbm.db import DB
+from nofussbm import mongo
 
 db = DB( 'MONGOLAB_URI' )
 

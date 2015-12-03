@@ -1,17 +1,17 @@
 # Copyright 2011, Massimo Santini <santini@dsi.unimi.it>
-# 
+#
 # This file is part of "No Fuss Bookmarks".
-# 
+#
 # "No Fuss Bookmarks" is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
 # Software Foundation, either version 3 of the License, or (at your option) any
 # later version.
-# 
+#
 # "No Fuss Bookmarks" is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 # details.
-# 
+#
 # You should have received a copy of the GNU General Public License along with
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
@@ -19,9 +19,9 @@ from logging import StreamHandler, Formatter, getLogger, DEBUG
 from os import environ
 
 from flask import Flask, make_response, request, g, redirect, url_for, abort, render_template
+from flask.ext.pymongo import PyMongo
 
 from pymongo.errors import OperationFailure
-
 
 # Configure from the environment, global (immutable) variables (before submodules import)
 
@@ -29,24 +29,30 @@ class Config( object ):
 	SECRET_KEY = environ[ 'SECRET_KEY' ]
 	SENDGRID_USERNAME = environ[ 'SENDGRID_USERNAME' ]
 	SENDGRID_PASSWORD = environ[ 'SENDGRID_PASSWORD' ]
+	MONGO_URI = environ[ 'MONGOLAB_URI' ]
+
+# Create the app and mongo helper
+app = Flask( __name__ )
+
+app.config[ 'MONGO_URI' ] = Config.MONGO_URI
+app.config[ 'MONGO_CONNECT' ] = 'False' # http://api.mongodb.org/python/current/faq.html#using-pymongo-with-multiprocessing
+mongo = PyMongo( app )
 
 from .api import api
-from .db import DB
 from .helpers import query_from_dict
 from .tags import tags
 
-# Create the app, register APIs blueprint and setup {before,teardown}_request  
+# Register APIs blueprint and setup {before,teardown}_request
 
-app = Flask( __name__ )
 app.register_blueprint( api, url_prefix = '/api/v1' )
 
-@app.before_request
-def before_request():
-	g.db = DB( 'MONGOLAB_URI' )
+# @app.before_request
+# def before_request():
+# 	g.db = DB( 'MONGOLAB_URI' )
 
-@app.teardown_request
-def teardown_request( exception ):
-	del g.db
+# @app.teardown_request
+# def teardown_request( exception ):
+# 	del g.db
 
 # Log to stderr (so heroku logs will pick'em up)
 
@@ -66,16 +72,16 @@ def textify( text, code = 200 ):
 
 def ident2email( ident ):
 	if '@' in ident: email = ident
-	else: 
+	else:
 		try:
-			alias = g.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
+			alias = mongo.db.aliases.find_one( { 'alias': ident }, { 'email': 1 } )
 			email = alias[ 'email' ]
 		except TypeError:
 			abort( 404 )
 		except OperationFailure:
 			abort( 500 )
 	return email
-	
+
 def list_query( email, limit = None ):
 	args = request.args
 	query = query_from_dict( email, args )
@@ -88,7 +94,7 @@ def list_query( email, limit = None ):
 	else:
 		if limit is None: limit = 0
 	if skip < 0 or limit < 0: abort( 400 )
-	return g.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] )
+	return mongo.db.bookmarks.find( query, skip = skip, limit = limit ).sort( [ ( 'date-modified', -1 ) ] )
 
 
 # Public "views"
@@ -115,7 +121,7 @@ def options():
 
 @app.route( '/<ident>' )
 def list( ident ):
-	
+
 	list_appearance = 'html' if request.headers[ 'User-Agent'].split( '/' )[ 0 ] in ( 'Microsoft Internet Explorer', 'Mozilla', 'Opera' ) else 'text'
 	la_c = request.cookies.get( 'list_appearance' )
 	if la_c: list_appearance = la_c
@@ -123,7 +129,7 @@ def list( ident ):
 	bookmarks_per_page = int( bpp_c ) if bpp_c else 10
 	show_tags = request.cookies.get( 'show_tags' ) != 'false'
 	content_only = 'content_only' in request.args
-		
+
 	result = []
 	email = ident2email( ident )
 	try:
@@ -134,7 +140,7 @@ def list( ident ):
 			if content_only:
 				return render_template( 'list-content.html', bookmarks = result )
 			else:
-				return render_template( 'list.html', bookmarks = result, top_tags = tags( g.db, email ) if show_tags else None )
+				return render_template( 'list.html', bookmarks = result, top_tags = tags( mongo.db, email ) if show_tags else None )
 		else:
 			for bm in list_query( email ):
 				date = bm[ 'date-modified' ]

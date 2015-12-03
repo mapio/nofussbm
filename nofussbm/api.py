@@ -26,7 +26,7 @@ from urlparse import parse_qs
 from flask import Blueprint, make_response, request, g, json, abort
 from pymongo.errors import OperationFailure, DuplicateKeyError
 
-from . import Config
+from . import Config, mongo
 from .helpers import send_mail, to_id, query_from_dict
 
 
@@ -101,7 +101,7 @@ def post():
 		bm[ 'email' ] = g.email
 		bm[ 'date-added' ] = bm[ 'date-modified' ] = datetime.utcnow()
 		try:
-			_id = g.db.bookmarks.insert( bm, safe = True )
+			_id = mongo.db.bookmarks.insert( bm )
 		except OperationFailure:
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 			code = 500
@@ -117,7 +117,7 @@ def get( bid = None ):
 
 	if bid:
 		try:
-			result.append( g.db.bookmarks.find_one( { '_id': to_id( bid ) , 'email': g.email } ) )
+			result.append( mongo.db.bookmarks.find_one( { '_id': to_id( bid ) , 'email': g.email } ) )
 		except OperationFailure:
 			abort( 500 )
 		return myjsonify( result )
@@ -135,7 +135,7 @@ def get( bid = None ):
 	query = query_from_dict( g.email, dict( ( k, args[ k ][ 0 ] ) for k in args.keys() ) if args else None )
 
 	try:
-		cur = g.db.bookmarks.find( query, skip = skip, limit = limit )
+		cur = mongo.db.bookmarks.find( query, skip = skip, limit = limit )
 		n = cur.count()
 		for bm in cur:
 			bm[ 'id' ] = bm[ '_id' ]; del bm[ '_id' ]
@@ -156,7 +156,7 @@ def put():
 			_id = bm[ 'id' ]
 			clean_bm( bm )
 			bm[ 'date-modified' ] = datetime.utcnow()
-			ret = g.db.bookmarks.update( { '_id': _id, 'email': g.email }, { '$set': bm }, safe = True )
+			ret = mongo.db.bookmarks.update( { '_id': _id, 'email': g.email }, { '$set': bm } )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 			code = 500
@@ -172,7 +172,7 @@ def delete():
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
-			ret = g.db.bookmarks.remove( { '_id': _id, 'email': g.email }, safe = True )
+			ret = mongo.db.bookmarks.remove( { '_id': _id, 'email': g.email } )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 			code = 500
@@ -186,7 +186,7 @@ def delete():
 def sendkey():
 	email = request.form[ 'email' ]
 	key = new_key( email )
-	g.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
+	mongo.db.emails.insert( { 'email': email, 'key': key, 'ip': request.remote_addr, 'date': datetime.utcnow() } )
 	try:
 		send_mail( 'Massimo Santini <massimo.santini@gmail.com>', email, 'Your "No Fuss Bookmark" API key', 'Your key is {0}'.format( key ) )
 	except:
@@ -199,11 +199,11 @@ def setalias( alias ):
 	result = {}
 	code = 200
 	try:
-		old = g.db.aliases.find_and_modify( { 'email': g.email }, { '$set': { 'alias' : alias } }, upsert = True )
+		old = mongo.db.aliases.find_and_modify( { 'email': g.email }, { '$set': { 'alias' : alias } }, upsert = True )
 		if 'alias' in old: result[ 'old' ] = old[ 'alias' ]
 		result[ 'status' ] = 'set'
 	except OperationFailure:
-		error = g.db.error()
+		error = mongo.db.error()
 		if 'err' in error and 'duplicate' in error[ 'err' ]:
 			result[ 'status' ] = 'duplicate'
 		else:
@@ -233,7 +233,7 @@ def delicious_import():
 			}
 			bms.append( bm )
 	try:
-		_id = g.db.bookmarks.insert( bms, safe = True )
+		_id = mongo.db.bookmarks.insert( bms )
 	except OperationFailure:
 		abort( 500 )
 	else:
@@ -243,7 +243,7 @@ def delicious_import():
 def stats():
 	result = {}
 	try:
-		result[ 'users' ] = g.db.bookmarks.group( { 'email': 1 }, None, { 'count': 0 }, 'function( o, p ){ p.count++; }' )
+		result[ 'users' ] = mongo.db.bookmarks.group( { 'email': 1 }, None, { 'count': 0 }, 'function( o, p ){ p.count++; }' )
 	except OperationFailure:
 		abort( 500 )
 	return myjsonify( result )
