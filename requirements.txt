@@ -1,5 +1,4 @@
 Flask
 gunicorn
 pymongo
-log4mongo
 https://github.com/hbldh/flask-pymongo/archive/feature/connect-option.zip
