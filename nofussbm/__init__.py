@@ -136,7 +136,8 @@ def list( ident ):
 		if list_appearance == 'html':
 			for bm in list_query( email, bookmarks_per_page ):
 				date = bm[ 'date-modified' ]
-				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ] ) )
+				print bm
+				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ], bm[ '_id' ] ) )
 			if content_only:
 				return render_template( 'list-content.html', bookmarks = result )
 			else:

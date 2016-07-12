@@ -1,6 +1,6 @@
 {% for bm in bookmarks %}
 <li>
-<a href="{{ bm[ 1 ] }}">{{ bm[ 2 ] }}</a> ({{ bm[ 0 ] }})
+<a href="{{ bm[ 1 ] }}">{{ bm[ 2 ] }}</a> ({{ bm[ 0 ] }}) [{{ bm[ 4 ] }}]
 
 <div>{% for tag in bm[ 3 ] %}<span class="tag" onclick="tagsbm( this )">{{ tag }}</span> {% endfor %}</div>
 </li>
