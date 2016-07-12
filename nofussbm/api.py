@@ -156,12 +156,13 @@ def put():
 			_id = bm[ 'id' ]
 			clean_bm( bm )
 			bm[ 'date-modified' ] = datetime.utcnow()
-			ret = mongo.db.bookmarks.update( { '_id': _id, 'email': g.email }, { '$set': bm } )
+			ret = mongo.db.bookmarks.update_one( { '_id': _id, 'email': g.email }, { '$set': bm } )
+			print ret
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 			code = 500
 		else:
-			result[ 'error' if ret[ 'err' ] else 'updated' if ret[ 'updatedExisting' ] else 'ignored' ].append( _id )
+			result[ 'updated' if ret.modified_count == 1 else 'ignored' ].append( _id )
 	return myjsonify( result, code )
 
 @api.route( '/', methods = [ 'DELETE' ] )
@@ -172,12 +173,12 @@ def delete():
 	for pos, bm in enumerate( request.json ):
 		try:
 			_id = bm[ 'id' ]
-			ret = mongo.db.bookmarks.remove( { '_id': _id, 'email': g.email } )
+			ret = mongo.db.bookmarks.delete_one( { '_id': _id, 'email': g.email } )
 		except ( KeyError, OperationFailure ):
 			result[ 'error' ].append( '#{0}'.format( pos ) )
 			code = 500
 		else:
-			result[ 'error' if ret[ 'err' ] else 'deleted' if ret[ 'n' ] else 'ignored' ].append( _id )
+			result[ 'deleted' if ret.deleted_count == 1 else 'ignored' ].append( _id )
 	return myjsonify( result, code )
 
 # signup and alias helpers
