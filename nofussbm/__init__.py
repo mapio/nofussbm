@@ -19,7 +19,7 @@ from logging import StreamHandler, Formatter, getLogger, DEBUG
 from os import environ
 
 from flask import Flask, make_response, request, g, redirect, url_for, abort, render_template
-from flask.ext.pymongo import PyMongo
+from flask_pymongo import PyMongo
 
 from pymongo.errors import OperationFailure
 
