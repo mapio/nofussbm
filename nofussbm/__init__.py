@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License along with
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
-from logging import StreamHandler, Formatter, getLogger, DEBUG
+from logging import StreamHandler, Formatter, DEBUG
 from os import environ
 
-from flask import Flask, make_response, request, g, redirect, url_for, abort, render_template
+from flask import Flask, make_response, request, redirect, url_for, abort, render_template
 from flask.ext.pymongo import PyMongo
 
 from pymongo.errors import OperationFailure
@@ -41,6 +41,9 @@ mongo = PyMongo( app )
 from .api import api
 from .helpers import query_from_dict
 from .tags import tags
+from .json import NofussbmJSONEncoder, NofussbmJSONDecoder
+app.json_encoder = NofussbmJSONEncoder
+app.json_decoder = NofussbmJSONDecoder
 
 # Register APIs blueprint and setup {before,teardown}_request
 
@@ -58,7 +61,7 @@ app.register_blueprint( api, url_prefix = '/api/v1' )
 
 stderr_handler = StreamHandler()
 stderr_handler.setLevel( DEBUG )
-stderr_handler.setFormatter( Formatter( '%(asctime)s [%(process)s] [%(levelname)s] [Flask: %(name)s] %(message)s','%Y-%m-%d %H:%M:%S' ) )
+stderr_handler.setFormatter( Formatter( '%(asctime)s [%(process)s] [%(levelname)s] [Flask: %(name)s] %(message)s', '%Y-%m-%d %H:%M:%S' ) )
 app.logger.addHandler( stderr_handler )
 app.logger.setLevel( DEBUG )
 
@@ -136,7 +139,6 @@ def list( ident ):
 		if list_appearance == 'html':
 			for bm in list_query( email, bookmarks_per_page ):
 				date = bm[ 'date-modified' ]
-				print bm
 				result.append( ( date.strftime( '%Y-%m-%d' ), bm[ 'url' ], bm[ 'title' ], bm[ 'tags' ], bm[ '_id' ] ) )
 			if content_only:
 				return render_template( 'list-content.html', bookmarks = result )

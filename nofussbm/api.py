@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License along with
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
+import hmac
+import re
+
 from base64 import b64encode, b64decode
 from datetime import datetime
 from functools import wraps
 from hashlib import sha1
-import hmac
-import re
 from urlparse import parse_qs
 
 from flask import Blueprint, make_response, request, g, json, abort
@@ -34,11 +35,6 @@ api = Blueprint( 'api', __name__ )
 
 RANGE_RE = re.compile( r'bookmarks=(\d+)(-(\d+))?' )
 
-
-# Hacks (somehow horrible) to personalize decoding in Flask request.json
-
-from .helpers import setup_json
-setup_json( json )
 
 def myjsonify( data = None, code = 200, headers = None ):
 	data = [] if not data else data

@@ -15,18 +15,13 @@
 # You should have received a copy of the GNU General Public License along with
 # "No Fuss Bookmarks". If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
 from email.mime.text import MIMEText
-from json import JSONEncoder, JSONDecoder
 from smtplib import SMTP
 
 from bson.objectid import ObjectId, InvalidId
 
 from . import Config
 
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
-
-ALLOWED_KEYS = set(( 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ))
 
 def to_id( id_as_str ):
 	res = None
@@ -47,43 +42,6 @@ def query_from_dict( email, dct ):
 	if 'title' in dct:
 		query[ 'title' ] = { '$regex': dct[ 'title' ], '$options': 'i' }
 	return query
-
-def setup_json( json ):
-
-	def object_hook( dct ):
-		res = {}
-		for key, value in dct.items():
-			if key not in ALLOWED_KEYS: continue
-			if key == 'id': res[ 'id' ] = to_id( value )
-			elif key == 'tags': res[ 'tags' ] = map( lambda _: _.strip(), value.split( ',' ) )
-			elif key.startswith( 'date-' ):
-				try:
-					res[ key ] = datetime.strptime( value, DATETIME_FORMAT )
-				except:
-					pass
-			else:
-				res[ key ] = value
-		return res
-
-	class Encoder( JSONEncoder ):
-		def default(self, obj):
-			if isinstance( obj, datetime ):
-				return datetime.strftime( obj, DATETIME_FORMAT )
-			if isinstance( obj, ObjectId ):
-				return str( obj )
-			return JSONEncoder.default( self, obj )
-
-	prev_dumps = json.dumps
-	prev_loads = json.loads
-
-	def _dumps( *args, **kwargs ):
-		kwargs.update( { 'cls':  Encoder } )
-		return prev_dumps( *args, **kwargs )
-	def _loads( *args, **kwargs ):
-		return prev_loads( *args, object_hook = object_hook, **kwargs )
-
-	json.dumps = _dumps
-	json.loads = _loads
 
 
 # Utility functions
