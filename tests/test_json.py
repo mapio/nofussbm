@@ -42,6 +42,9 @@ class NofussbmJSONTestCase(unittest.TestCase):
                          '"url": "https://google.com"'
                          '}]')
 
+        self.assertEqual(self.app.json_encoder, nofussbm.json.NofussbmJSONEncoder)
+        self.assertEqual(self.app.json_decoder, nofussbm.json.NofussbmJSONDecoder)
+
         with self.app.app_context():
             load = flask.json.loads(to_load)  # expected_dump
             dump = flask.json.dumps(expected_load)
