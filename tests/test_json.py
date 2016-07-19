@@ -41,11 +41,15 @@ class NofussbmJSONTestCase(unittest.TestCase):
                          '"title": "Google", '
                          '"url": "https://google.com"'
                          '}]')
+
         with self.app.app_context():
-            load = flask.json.loads(to_load)
+            load = flask.json.loads(to_load)  # expected_dump
             dump = flask.json.dumps(expected_load)
             self.assertEqual(load, expected_load)
             self.assertEqual(dump, expected_dump)
+
+            tags_as_list_load = flask.json.loads(expected_dump)
+            self.assertEqual(tags_as_list_load, expected_load)
 
 if __name__ == '__main__':
     unittest.main()

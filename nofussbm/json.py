@@ -48,7 +48,10 @@ class NofussbmJSONDecoder(JSONDecoder):
             if key == 'id':
                 res['id'] = to_id(value)
             elif key == 'tags':
-                res['tags'] = [_.strip() for _ in value.split(',')]
+                try:
+                    res['tags'] = [_.strip() for _ in value.split(',')]
+                except AttributeError:
+                    res['tags'] = [_.strip() for _ in value]
             elif key.startswith('date-'):
                 try:
                     res[key] = datetime.strptime(value, DATETIME_FORMAT)
