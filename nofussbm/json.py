@@ -23,40 +23,40 @@ from .helpers import to_id
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 
-class NofussbmJSONEncoder(JSONEncoder):
+class NofussbmJSONEncoder( JSONEncoder ):
 
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return datetime.strftime(obj, DATETIME_FORMAT)
-        if isinstance(obj, ObjectId):
-            return str(obj)
-        return JSONEncoder.default(self, obj)
+    def default( self, obj ):
+        if isinstance( obj, datetime ):
+            return datetime.strftime( obj, DATETIME_FORMAT )
+        if isinstance( obj, ObjectId ):
+            return str( obj )
+        return JSONEncoder.default( self, obj )
 
 
-class NofussbmJSONDecoder(JSONDecoder):
+class NofussbmJSONDecoder( JSONDecoder ):
 
-    def __init__(self, *args, **kwargs):
-        self.ALLOWED_KEYS = set(['title', 'url', 'id', 'tags', 'date-added', 'date-modified'])
-        self.orig_object_hook = kwargs.pop("object_hook", None)
-        super(NofussbmJSONDecoder, self).__init__(*args, object_hook=self.custom_object_hook, **kwargs)
+    def __init__( self, *args, **kwargs ):
+        self.ALLOWED_KEYS = set( [ 'title', 'url', 'id', 'tags', 'date-added', 'date-modified' ] )
+        self.orig_object_hook = kwargs.pop( "object_hook", None )
+        super( NofussbmJSONDecoder, self ).__init__( *args, object_hook=self.custom_object_hook, **kwargs )
 
-    def custom_object_hook(self, dct):
+    def custom_object_hook( self, dct ):
         res = dict()
         for key, value in dct.items():
             if key not in self.ALLOWED_KEYS:
                 continue
             if key == 'id':
-                res['id'] = to_id(value)
+                res[ 'id' ] = to_id( value )
             elif key == 'tags':
                 try:
-                    res['tags'] = [_.strip() for _ in value.split(',')]
+                    res[ 'tags' ] =  [ _.strip() for _ in value.split( ',' ) ]
                 except AttributeError:
-                    res['tags'] = [_.strip() for _ in value]
-            elif key.startswith('date-'):
+                    res[ 'tags' ] =  [ _.strip() for _ in value]
+            elif key.startswith( 'date-' ):
                 try:
-                    res[key] = datetime.strptime(value, DATETIME_FORMAT)
+                    res[ key ] = datetime.strptime( value, DATETIME_FORMAT )
                 except:
                     pass
             else:
-                res[key] = value
+                res[ key ] = value
         return res
