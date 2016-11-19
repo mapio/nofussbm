@@ -1,6 +1,8 @@
 No Fuss Bookmarks
 =================
 
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/d/hflhgljplfoljnanaackikeflkooodfj.svg)]()
+
 No Fuss Bookmarks is a very simple **software** and **service** to store
 bookmarks especially designed for hackers (that don't need fancy interfaces,
 but **nice API**).
